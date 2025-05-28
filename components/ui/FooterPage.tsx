@@ -26,8 +26,10 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
                 : ''
             }
             {
-              storeData?.address && storeData?.address !== ''
-                ? <Link className='text-sm' href={storeData?.mapsLink && storeData?.mapsLink !== '' ? storeData?.mapsLink : ''} target='_blank'>{storeData?.address}, {storeData.city}, {storeData.region}</Link>
+              storeData?.locations?.length
+                ? storeData.locations.map(location => (
+                  <Link key={location.address} className='text-sm' href={location?.mapsLink && location?.mapsLink !== '' ? location?.mapsLink : ''} target='_blank'>{location?.address}, {location.city}, {location.region}</Link>
+                ))
                 : ''
             }
             <div className='flex gap-4'>
@@ -59,7 +61,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
             </div>
           </div>
           {
-            politics?.terms && politics?.terms !== '' || politics?.privacy && politics?.privacy !== ''
+            politics?.terms && politics?.terms !== '' || politics?.privacy && politics?.privacy !== '' || politics?.devoltions && politics?.devoltions !== '' || politics?.shipping && politics?.shipping !== '' || politics?.pay && politics?.pay !== ''
               ? (
                 <div className='flex flex-col gap-3'>
                   <h3>POLITICAS</h3>
@@ -71,7 +73,22 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
                     }
                     {
                       politics.privacy && politics.privacy !== ''
-                        ? <Link className='block text-sm mb-1' href='/politicas-de-privacidad'>Politicas de privacidad</Link>
+                        ? <Link className='block text-sm mb-1' href='/politicas-de-privacidad'>Políticas de privacidad</Link>
+                        : ''
+                    }
+                    {
+                      politics.devoltions && politics.devoltions !== ''
+                        ? <Link className='block text-sm mb-1' href='/politicas-de-devoluciones'>Políticas de devoluciones</Link>
+                        : ''
+                    }
+                    {
+                      politics.shipping && politics.shipping !== ''
+                        ? <Link className='block text-sm mb-1' href='/politica-de-envios'>Política de envíos</Link>
+                        : ''
+                    }
+                    {
+                      politics.pay && politics.pay !== ''
+                        ? <Link className='block text-sm mb-1' href='/politica-de-pagos'>Política de pagos</Link>
                         : ''
                     }
                   </div>

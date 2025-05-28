@@ -4,11 +4,13 @@ export interface IStoreData {
     nameContact?: string
     email: string
     phone?: string
-    mapsLink?: string
-    address?: string
-    departament?: string
-    region?: string
-    city?: string
+    locations?: {
+        mapsLink?: string
+        address?: string
+        departament?: string
+        region?: string
+        city?: string
+    }[]
     logo?: string
     logoWhite?: string
     instagram?: string

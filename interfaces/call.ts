@@ -14,4 +14,8 @@ export interface ICall {
     message?: string
     redirect?: string
     calendar?: string
+    address?: string
+    details?: string
+    city?: string
+    region?: string
 }

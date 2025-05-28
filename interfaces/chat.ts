@@ -2,9 +2,10 @@ export interface IMessage {
     senderId?: string
     message?: string
     response?: string
+    agent?: boolean
     adminView?: boolean
     userView?: boolean
-    shop?: number
+    ready?: boolean
 
     createdAt?: Date
     updatedAt?: Date

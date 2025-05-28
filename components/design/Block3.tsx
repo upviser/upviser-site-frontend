@@ -168,7 +168,7 @@ export const Block3 = ({ content, index, calls, forms, design, payment, style, s
     <>
       <PopupPage popup={popup} setPopup={setPopup} content={cont} design={design} calls={calls} forms={forms} payment={payment} style={style} />
       <div key={content.content} className={`py-10 md:py-20 w-full flex px-4`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}` }}>
-        <div className="text-center m-auto max-w-[1280px] w-full flex flex-col gap-8">
+        <div className="text-center m-auto max-w-[1100px] w-full flex flex-col gap-8">
           {
             content.info.titleForm === 'Logo principal' && storeData?.logo && storeData.logo !== ''
               ? <Link ref={refLogo} href='/' target='_blank' className={`${viewLogo ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 w-fit m-auto`}><Image src={storeData.logo} alt={`Logo ${storeData.name}`} width={320} height={150} className='w-44 m-auto lg:w-52' /></Link>

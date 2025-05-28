@@ -316,36 +316,68 @@ export const Lead2 = ({ content, forms, step, index, services, storeData, style 
                       return
                     }
                 
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, client)
-                
-                    const newEventId = new Date().getTime().toString()
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
-                      firstName: client.firstName,
-                      lastName: client.lastName,
-                      email: client.email,
-                      phone: client.phone,
-                      data: client.data,
-                      form: client.forms![0].form,
-                      fbc: Cookies.get('_fbc'),
-                      fbp: Cookies.get('_fbp'),
-                      service: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                      funnel: client.funnel,
-                      step: client.funnel?.step,
-                      page: pathname,
-                      eventId: newEventId
-                    })
-                
-                    fbq('track', 'Lead', {
-                      first_name: client.firstName,
-                      last_name: client.lastName,
-                      email: client.email,
-                      phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
-                      fbp: Cookies.get('_fbp'),
-                      fbc: Cookies.get('_fbc'),
-                      content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                      contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
-                      event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
-                    }, { eventID: newEventId })
+                    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
+                    if (!res.data.message) {
+                      const respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
+                      const stepFind = respo.data.steps.find((ste: any) => ste.step === step)
+                      const stepIndex = respo.data.steps.reverse().findIndex((ste: any) => ste.step === step)
+                      const service = services?.find(service => service._id === respo.data.service)
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...client, funnels: [{ funnel: respo.data._id, step: stepFind._id }], services: stepIndex === 0 ? service?._id ? [{ service: service._id, step: service.steps[0]._id }] : [] : [] })
+                      const newEventId = new Date().getTime().toString()
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
+                        firstName: client.firstName,
+                        lastName: client.lastName,
+                        email: client.email,
+                        phone: client.phone,
+                        data: client.data,
+                        form: client.forms![0].form,
+                        fbc: Cookies.get('_fbc'),
+                        fbp: Cookies.get('_fbp'),
+                        service: service?._id,
+                        funnel: respo.data._id,
+                        step: stepFind._id,
+                        page: pathname,
+                        eventId: newEventId
+                      })
+                  
+                      fbq('track', 'Lead', {
+                        first_name: client.firstName,
+                        last_name: client.lastName,
+                        email: client.email,
+                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                        fbp: Cookies.get('_fbp'),
+                        fbc: Cookies.get('_fbc'),
+                        content_name: service?._id,
+                        contents: { id: service?._id, quantity: 1 },
+                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                      }, { eventID: newEventId })
+                    } else {
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, client)
+                      const newEventId = new Date().getTime().toString()
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
+                        firstName: client.firstName,
+                        lastName: client.lastName,
+                        email: client.email,
+                        phone: client.phone,
+                        data: client.data,
+                        form: client.forms![0].form,
+                        fbc: Cookies.get('_fbc'),
+                        fbp: Cookies.get('_fbp'),
+                        page: pathname,
+                        eventId: newEventId
+                      })
+                      fbq('track', 'Lead', {
+                        first_name: client.firstName,
+                        last_name: client.lastName,
+                        email: client.email,
+                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                        fbp: Cookies.get('_fbp'),
+                        fbc: Cookies.get('_fbc'),
+                        content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
+                        contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
+                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                      }, { eventID: newEventId })
+                    }
                 
                     if (form?.action === 'Ir a una pagina') {
                       router.push(form.redirect!)

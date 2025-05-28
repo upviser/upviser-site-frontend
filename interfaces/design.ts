@@ -7,6 +7,21 @@ export interface Design {
     whatsapp?: boolean
     instagram?: boolean
     chatView?: boolean
+    productPage: IProductPage[]
+    categoryPage: ICategoryPage[]
+    cartPage: { bgColor: string, textColor: string, detailsColor: string }
+    checkoutPage: { bgColor: string, textColor: string, detailsColor: string }
+}
+
+export interface IProductPage {
+    reviews: boolean
+    title: string
+    text: string
+    design: IDesign[]
+}
+
+export interface ICategoryPage {
+    design: IDesign[]
 }
 
 export interface IHeader {

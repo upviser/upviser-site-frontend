@@ -1,1 +1,5 @@
 export * from './NumberFormat'
+export * from './QuantityOffer'
+export * from './FreeShipping'
+export * from './Dimentions'
+export * from './VerifyStock'

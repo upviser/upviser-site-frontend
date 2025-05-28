@@ -1,53 +1,60 @@
 import React from "react"
 import { AllNavbar } from "."
 
+export const revalidate = 3600
+
 async function fetchDesign () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/design`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/design`)
   return res.json()
 }
 
 async function fetchStoreData () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/store-data`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/store-data`)
   return res.json()
 }
 
 async function fetchFunnels () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/funnels`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/funnels`)
   return res.json()
 }
 
 async function fetchPolitics () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/politics`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/politics`)
   return res.json()
 }
 
 async function fetchCalls () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calls`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/calls`)
   return res.json()
 }
 
 async function fetchForms () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms`)
   return res.json()
 }
 
 async function fetchPayment () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment`)
   return res.json()
 }
 
 async function fetchServices () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`)
   return res.json()
 }
 
 async function fetchStyle () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/style`, { next: { revalidate: 3600 } })
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/style`)
   return res.json()
 }
 
-async function fetchIntegrations () {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/integrations`, { next: { revalidate: 3600 } })
+async function fetchCategories () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`)
+  return res.json()
+}
+
+async function fetchProducts () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`)
   return res.json()
 }
 
@@ -71,10 +78,14 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   const styleData = fetchStyle()
 
-  const [design, storeData, funnels, politics, calls, forms, payment, services, style] = await Promise.all([designData, storeDataData, funnelsData, politicsData, callsData, formsData, paymentData, servicesData, styleData])
+  const categoriesData = fetchCategories()
+
+  const productsData = fetchProducts()
+
+  const [design, storeData, funnels, politics, calls, forms, payment, services, style, categories, products] = await Promise.all([designData, storeDataData, funnelsData, politicsData, callsData, formsData, paymentData, servicesData, styleData, categoriesData, productsData])
   
   return (
-    <AllNavbar design={design} storeData={storeData} funnels={funnels} politics={politics} calls={calls} forms={forms} payment={payment} services={services} style={style}>
+    <AllNavbar design={design} storeData={storeData} funnels={funnels} politics={politics} calls={calls} forms={forms} payment={payment} services={services} style={style} categories={categories} products={products}>
       { children }
     </AllNavbar>
   )

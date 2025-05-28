@@ -1,5 +1,5 @@
 "use client"
-import { IClient, IDesign, IForm } from '@/interfaces'
+import { IClient, IDesign, IForm, IService } from '@/interfaces'
 import React, { useEffect, useRef, useState } from 'react'
 import { Button, H1, H2, Input, P, Select } from '../ui'
 import axios from 'axios'
@@ -11,11 +11,13 @@ interface Props {
     index: number
     style?: any
     forms?: IForm[]
+    step?: string
+    services?: IService[]
 }
 
 declare const fbq: Function
 
-export const Form: React.FC<Props> = ({ content, index, style, forms }) => {
+export const Form: React.FC<Props> = ({ content, index, style, forms, step, services }) => {
   const [question, setQuestion] = useState(-1);
   const contentRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [client, setClient] = useState<IClient>({ email: '', tags: forms?.find(form => form._id === content.form)?.tags, forms: [{ form: forms?.find(form => form._id === content.form)?._id! }] })
@@ -191,38 +193,69 @@ export const Form: React.FC<Props> = ({ content, index, style, forms }) => {
                       setLoading(false)
                       return
                     }
-                
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, client)
-                
-                    const newEventId = new Date().getTime().toString()
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
-                      firstName: client.firstName,
-                      lastName: client.lastName,
-                      email: client.email,
-                      phone: client.phone,
-                      data: client.data,
-                      form: client.forms![0].form,
-                      fbc: Cookies.get('_fbc'),
-                      fbp: Cookies.get('_fbp'),
-                      service: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                      funnel: client.funnel,
-                      step: client.funnel?.step,
-                      page: pathname,
-                      eventId: newEventId
-                    })
-                
-                    fbq('track', 'Lead', {
-                      first_name: client.firstName,
-                      last_name: client.lastName,
-                      email: client.email,
-                      phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
-                      fbp: Cookies.get('_fbp'),
-                      fbc: Cookies.get('_fbc'),
-                      content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                      contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
-                      event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
-                    }, { eventID: newEventId })
-                
+
+                    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
+                    if (!res.data.message) {
+                      const respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
+                      const stepFind = respo.data.steps.find((ste: any) => ste.step === step)
+                      const stepIndex = respo.data.steps.reverse().findIndex((ste: any) => ste.step === step)
+                      const service = services?.find(service => service._id === respo.data.service)
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...client, funnels: [{ funnel: respo.data._id, step: stepFind._id }], services: stepIndex === 0 ? service?._id ? [{ service: service._id, step: service.steps[0]._id }] : [] : [] })
+                      const newEventId = new Date().getTime().toString()
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
+                        firstName: client.firstName,
+                        lastName: client.lastName,
+                        email: client.email,
+                        phone: client.phone,
+                        data: client.data,
+                        form: client.forms![0].form,
+                        fbc: Cookies.get('_fbc'),
+                        fbp: Cookies.get('_fbp'),
+                        service: service?._id,
+                        funnel: respo.data._id,
+                        step: stepFind._id,
+                        page: pathname,
+                        eventId: newEventId
+                      })
+                      fbq('track', 'Lead', {
+                        first_name: client.firstName,
+                        last_name: client.lastName,
+                        email: client.email,
+                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                        fbp: Cookies.get('_fbp'),
+                        fbc: Cookies.get('_fbc'),
+                        content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
+                        contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
+                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                      }, { eventID: newEventId })
+                    } else {
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, client)
+                      const newEventId = new Date().getTime().toString()
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
+                        firstName: client.firstName,
+                        lastName: client.lastName,
+                        email: client.email,
+                        phone: client.phone,
+                        data: client.data,
+                        form: client.forms![0].form,
+                        fbc: Cookies.get('_fbc'),
+                        fbp: Cookies.get('_fbp'),
+                        page: pathname,
+                        eventId: newEventId
+                      })
+                      fbq('track', 'Lead', {
+                        first_name: client.firstName,
+                        last_name: client.lastName,
+                        email: client.email,
+                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                        fbp: Cookies.get('_fbp'),
+                        fbc: Cookies.get('_fbc'),
+                        content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
+                        contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
+                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                      }, { eventID: newEventId })
+                    }
+
                     if (form?.action === 'Ir a una pagina') {
                       router.push(form.redirect!)
                     } else if (form?.action === 'Mostrar mensaje') {
@@ -230,7 +263,7 @@ export const Form: React.FC<Props> = ({ content, index, style, forms }) => {
                     }
                   }
                 }}>
-                  <div className={`flex flex-col gap-4 h-fit m-auto w-full p-6 md:p-8 max-w-[500px] bg-white`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.form === 'Borde' ? `1px solid ${style.borderColor}` : '' }}>
+                  <div className={`flex flex-col gap-4 h-fit m-auto w-full p-6 md:p-8 max-w-[500px] bg-white`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }}>
                     {
                       message !== ''
                         ? (

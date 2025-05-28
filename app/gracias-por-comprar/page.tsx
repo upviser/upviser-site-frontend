@@ -1,9 +1,12 @@
 "use client"
 import axios from 'axios'
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Cookies from 'js-cookie'
 import { io } from 'socket.io-client'
 import { H1 } from '@/components/ui'
+import { ISell } from '@/interfaces'
+import { offer } from '@/utils'
+import CartContext from '@/context/cart/CartContext'
 
 const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/`, {
   transports: ['websocket']
@@ -13,6 +16,8 @@ declare const fbq: Function
 
 const PageBuySuccess = () => {
 
+  const {setCart} = useContext(CartContext)
+
   const updateClient = async () => {
     if (localStorage.getItem('pay')) {
       const pay = JSON.parse(localStorage.getItem('pay')!)
@@ -21,6 +26,14 @@ const PageBuySuccess = () => {
       socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: '', url: '/pagos', view: false })
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: '', url: '/pagos', view: false })
       localStorage.setItem('pay', '')
+      localStorage.setItem('service', '')
+    } else if (localStorage.getItem('sell')) {
+      const sell: ISell = JSON.parse(localStorage.getItem('sell')!)
+      fbq('track', 'Purchase', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { email: sell.email, firstName: sell.firstName, lastName: sell.lastName, phone: sell.phone, address: sell.address, departament: sell.details, region: sell.region, city: sell.city, tags: sell.subscription ? ['Clientes', 'Suscriptores'] : ['Clientes'] })
+      localStorage.setItem('sell', '')
+      localStorage.setItem('cart', '')
+      setCart([])
     }
   }
 

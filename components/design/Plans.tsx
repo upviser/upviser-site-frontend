@@ -20,7 +20,6 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
   const [popup, setPopup] = useState({ view: 'hidden', opacity: 'opacity-0', mouse: false })
   const [plan, setPlan] = useState<IPlan>()
   const [typePrice, setTypePrice] = useState('Mensual')
-  const [contacts, setContacts] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [titleLoaded, setTitleLoaded] = useState(false);
   const [descriptionLoaded, setDescriptionLoaded] = useState(false);
@@ -208,7 +207,7 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
 
   return (
     <>
-      <PopupPlans popup={popup} setPopup={setPopup} plan={plan} services={services} payment={payment} content={content} step={step} style={style} typePrice={typePrice} contacts={contacts} forms={forms} />
+      <PopupPlans popup={popup} setPopup={setPopup} plan={plan} services={services} payment={payment} content={content} step={step} style={style} typePrice={typePrice} forms={forms} />
       <div onMouseUp={() => setIsDragging(false)} className={`py-10 md:py-20 px-4 m-auto w-full flex`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}`, color: content.info.textColor }}>
         <div className='flex flex-col gap-8 m-auto w-full max-w-[1280px]'>
           {
@@ -253,7 +252,7 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
                         <div className='flex flex-col gap-4'>
                           <p className='text-center font-medium text-xl'>{plan.name}</p>
                           <div className='flex gap-2 w-fit m-auto'>
-                            <p className='text-center font-bold text-3xl'>${NumberFormat(Number(typePrice === 'Mensual' ? contacts === '' ? plan.price : contacts === 'level2' ? plan.level2 : contacts === 'level3' ? plan.level3 : contacts === 'level4' ? plan.level4 : contacts === 'level5' ? plan.level5 : contacts === 'level6' ? plan.level6 : '' : contacts === '' ? plan.anualPrice : contacts === 'level2' ? plan.anualLevel2 : contacts === 'level3' ? plan.anualLevel3 : contacts === 'level4' ? plan.anualLevel4 : contacts === 'level5' ? plan.anualLevel5 : contacts === 'level6' ? plan.anualLevel6 : ''))}</p>
+                            <p className='text-center font-bold text-3xl'>${NumberFormat(Number(typePrice === 'Mensual' ? plan.price : plan.anualPrice))}</p>
                             <p ref={index === 0 ? plan1Ref : index === 1 ? plan2Ref : index === 2 ? plan3Ref : index === 3 ? plan4Ref : index === 4 ? plan5Ref : ''} className='my-auto'>{services?.find(service => service._id === content.service?.service)?.typePrice === 'Suscripción' ? `/ ${typePrice === 'Mensual' ? 'Mes' : 'Anual'}` : ''}</p>
                           </div>
                           {

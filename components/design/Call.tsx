@@ -31,9 +31,10 @@ export const Call = ({ calls, content, step, services, payment, storeData, index
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
       const respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
       const stepFind = respo.data?.steps.find((ste: any) => ste.step === step)
+      const stepIndex = respo.data.steps.reverse().findIndex((ste: any) => ste.step === step)
       const service = services?.find(service => service._id === respo.data?.service)
       if (res.data) {
-        setNewClient({ ...newClient, funnels: [{ funnel: respo.data?._id, step: stepFind?._id }], services: service?._id ? [{ service: service?._id }] : undefined })
+        setNewClient({ ...newClient, funnels: [{ funnel: respo.data?._id, step: stepFind?._id }], services: service?._id ? stepIndex === 0 ? [{ service: service?._id, step: service.steps[0]._id }] : [{ service: service?._id }] : undefined })
       }
     }
   }
@@ -244,11 +245,11 @@ export const Call = ({ calls, content, step, services, payment, storeData, index
                     : ''
                 }
                 {
-                  calls.find(call => call._id === content.meeting)?.type?.find(typ => typ === 'Visita al local') && storeData?.address
+                  calls.find(call => call._id === content.meeting)?.type?.find(typ => typ === 'Visita al local')
                     ? (
                       <div className="flex flex-col gap-3">
                         <p className="font-medium">Dirección:</p>
-                        <p>{storeData?.address}, {storeData?.city}, {storeData?.region}</p>
+                        <p>{calls.find(call => call._id === content.meeting)?.address}, {calls.find(call => call._id === content.meeting)?.city}, {calls.find(call => call._id === content.meeting)?.region}</p>
                       </div>
                     )
                     : ''

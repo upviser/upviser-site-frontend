@@ -1,10 +1,13 @@
 "use client"
 import { IMessage, IStoreData } from '@/interfaces'
 import axios from 'axios'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import io from 'socket.io-client'
-import { Input } from '../ui'
+import { Button, Input } from '../ui'
+import CartContext from '@/context/cart/CartContext'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 declare const fbq: Function
 
@@ -24,21 +27,47 @@ export const Chat: React.FC<Props> = ({ style, storeData, design, viewChat }) =>
   const [chatView, setChatView] = useState(false)
   const [chatOpacity, setChatOpacity] = useState('-mb-[200px]')
   const [chat, setChat] = useState<IMessage[]>([{
-    response: `¡Hola! Te damos la bienvenida a ${storeData?.name}${storeData?.nameContact && storeData?.nameContact !== '' ? `, mi nombre es ${storeData?.nameContact} ` : ''} ¿En que te puedo ayudar?`,
+    response: `¡Hola! Soy el agente de IA de ${storeData?.name} ¿En que te puedo ayudar?`,
     adminView: false,
-    userView: false
+    userView: false,
+    agent: true
   }])
   const [newMessage, setNewMessage] = useState('')
+  const [loadingMessage, setLoadingMessage] = useState(false)
+
+  const {setCart} = useContext(CartContext)
 
   const chatRef = useRef(chat)
   const containerRef = useRef<HTMLDivElement>(null)
   const chatOpacityRef = useRef(chatOpacity)
 
+  const router = useRouter()
+
   const getMessages = async () => {
     if (localStorage.getItem('chatId')) {
       const senderId = localStorage.getItem('chatId')
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chat/${senderId}`)
-      setChat(response.data)
+      const messages = response.data
+      const messagesReverse = messages.reverse()
+      const lastMessage = messagesReverse[0]
+      if (lastMessage?.createdAt) {
+        const lastDate = new Date(lastMessage.createdAt);
+        const now = new Date();
+        const diffInDays = (now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (diffInDays > 2) {
+          setChat([
+            ...response.data,
+            {
+              response: `¡Hola! Soy el agente de IA de ${storeData?.name} ¿En qué te puedo ayudar?`,
+              adminView: false,
+              userView: false,
+              agent: true
+            },
+          ])
+        } else {
+          setChat(response.data)
+        }
+      }
     }
   }
 
@@ -84,35 +113,103 @@ export const Chat: React.FC<Props> = ({ style, storeData, design, viewChat }) =>
     }
   }, [chat])
 
+  const renderMessageWithLinks = (message: string) => {
+    // Expresión regular para encontrar las etiquetas <a>
+    const regex = /<a href="([^"]+)">([^<]+)<\/a>/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    // Buscar todas las coincidencias de <a> en el mensaje
+    while ((match = regex.exec(message)) !== null) {
+      // Agregar el texto antes del enlace
+      parts.push(message.slice(lastIndex, match.index));
+      // Crear el componente Link para el enlace
+      parts.push(
+        <Link key={match.index} href={match[1]} onClick={() => {
+          setChatOpacity('-mb-[200px]')
+          setTimeout(() => {
+            setChatView(false)
+          }, 500);
+        }} className='text-blue-600 underline'>
+          {match[2]}
+        </Link>
+      );
+      lastIndex = regex.lastIndex;
+    }
+    // Agregar el texto restante después del último enlace
+    parts.push(message.slice(lastIndex));
+
+    return <>{parts}</>;
+  };
+
   const submitMessage = async (e: any) => {
     e.preventDefault()
-    let senderId
-    let message = newMessage
-    let ultimateMessage = [...chat]
-    ultimateMessage.reverse()
-    setNewMessage('')
-    setChat(chat.concat({message: message, userView: true}))
-    if (localStorage.getItem('chatId')) {
-      senderId = localStorage.getItem('chatId')
-    } else {
-      senderId = uuidv4()
-      localStorage.setItem('chatId', senderId)
+    if (!loadingMessage) {
+      setLoadingMessage(true)
+      let senderId
+      let cart
+      let message = newMessage
+      setNewMessage('')
+      setChat(chat.concat({message: message, userView: true}))
+      if (localStorage.getItem('chatId')) {
+        senderId = localStorage.getItem('chatId')
+      } else {
+        senderId = uuidv4()
+        localStorage.setItem('chatId', senderId)
+      }
+      if (localStorage.getItem('cart')) {
+        cart = JSON.parse(localStorage.getItem('cart')!)
+      } else {
+        cart = [{
+          name: '',
+          image: '',
+          price: '',
+          beforePrice: '',
+          variation: {
+            variation: '',
+            subVariation: '',
+            subVariation2: '',
+            stock: '',
+            image: '',
+            sku: ''
+          },
+          slug: '',
+          quantity: '',
+          stock: '',
+          category: { category: '', slug: '' },
+          quantityOffers: [],
+          sku: ''
+        }]
+        localStorage.setItem('cart', JSON.stringify(cart))
+      }
+      let response
+      if (!chat.reverse()[0].agent) {
+        socket.emit('message', {message: message, senderId: senderId, createdAt: new Date()})
+      }
+      if (chat.length === 1) {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chat/create`, { senderId: senderId, response: chat[0].response, agent: true, adminView: false, userView: true, cart: cart })
+      } else if (chat.reverse()[0].message === `¡Hola! Soy el agente de IA de ${storeData?.name} ¿En que te puedo ayudar?`) {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chat`, { senderId: senderId, response: `¡Hola! Soy el agente de IA de ${storeData?.name} ¿En que te puedo ayudar?`, agent: true, adminView: false, userView: true, cart: cart })
+      }
+      response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chat`, { senderId: senderId, message: message, agent: chat.reverse()[0].agent, adminView: false, userView: true, cart: cart })
+      if (response!.data.response) {
+        setChat(chat.filter(mes => mes.message === message))
+      }
+      setLoadingMessage(false)
+      if (response!.data.response) {
+        setChat(chat.concat(response!.data))
+      }
+      if (response!.data.cart) {
+        localStorage.setItem('cart', JSON.stringify(response.data.cart))
+        setCart(response.data.cart)
+      }
     }
-    let response
-    socket.emit('message', {message: message, senderId: senderId, createdAt: new Date()})
-    if (chat.length === 1) {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chat/create`, { senderId: senderId, response: chat[0].response, agent: false, adminView: false, userView: true })
-    }
-    response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/chat`, { senderId: senderId, message: message, adminView: false, userView: true })
-    if (response!.data.response) {
-      setChat(chat.filter(mes => mes.message === message))
-    }
-    setChat(chat.concat(response!.data))
   }
 
   return (
     <>
-        <div className={`${chatOpacity} ${chatView ? 'flex' : 'hidden'} ${chatOpacity === '-mb-[200px]' ? 'opacity-0' : 'opacity-1'} fixed bottom-24 right-4 z-50 h-[480px] ml-3 justify-between flex-col gap-3 transition-all duration-500 w-80 sm:w-96 sm:h-[600px] sm:gap-4`} style={{ borderRadius: `${style.borderBlock}px`, boxShadow: `0px 3px 20px 3px #11111120`, backgroundColor: design.chat?.bgColor && design.chat.bgColor !== '' ? design.chat.bgColor : '#ffffff' }}>
+        <div className={`${chatOpacity} ${chatView ? 'flex' : 'hidden'} ${chatOpacity === '-mb-[200px]' ? 'opacity-0' : 'opacity-1'} fixed bottom-24 right-4 z-50 h-[450px] ml-3 justify-between flex-col gap-3 transition-all duration-500 w-80 sm:w-96 sm:h-[570px] sm:gap-4`} style={{ borderRadius: `${style.borderBlock}px`, boxShadow: `0px 3px 20px 3px #11111125`, backgroundColor: design.chat?.bgColor && design.chat.bgColor !== '' ? design.chat.bgColor : '#ffffff' }}>
           <div className='h-28 w-full flex p-4' style={{ backgroundColor: style.primary, borderTopLeftRadius: `${style.borderBlock}px`, borderTopRightRadius: `${style.borderBlock}px` }}>
             <span className='text-white mt-auto mb-auto text-xl'>Chat</span>
           </div>
@@ -120,27 +217,54 @@ export const Chat: React.FC<Props> = ({ style, storeData, design, viewChat }) =>
             {
               chat?.length
                 ? chat.map((info, i) => (
-                  <div key={info.response} className='flex flex-col gap-2 pr-3 sm:pr-4'>
-                    {
-                      info.message
-                        ? (
-                          <div className='flex flex-col gap-2 ml-6'>
-                            <div className='bg-gray-200 p-1.5 rounded-md w-fit ml-auto'><p>{info.message}</p></div>
+                    <div key={info.response} className="flex flex-col gap-2 pr-3 sm:pr-4">
+                      {info.message && (
+                        <div className="flex flex-col gap-2 ml-6">
+                          <div
+                            className="text-white p-1.5 rounded-md w-fit ml-auto"
+                            style={{ backgroundColor: style.primary }}
+                          >
+                            {/* Renderizar el mensaje con enlaces */}
+                            {renderMessageWithLinks(info.message)}
                           </div>
-                        )
-                        : ''
-                    }
-                    {
-                      info.response
-                        ? (
-                          <div className='flex flex-col gap-2 mr-6'>
-                            <div className='text-white p-1.5 rounded-md w-fit' style={{ backgroundColor: style.primary }}><p>{info.response}</p></div>
+                        </div>
+                      )}
+                      {info.response && (
+                        <div className="flex flex-col gap-2 mr-6">
+                          <div className="bg-gray-200 p-1.5 rounded-md w-fit">
+                            {/* Renderizar la respuesta con enlaces */}
+                            {renderMessageWithLinks(info.response)}
                           </div>
-                        )
-                        : ''
-                    }
+                          {info.ready && (
+                            <Button
+                              action={(e: any) => {
+                                e.preventDefault();
+                                router.push('/finalizar-compra');
+                                setChatOpacity('-mb-[200px]');
+                                setTimeout(() => {
+                                  setChatView(false);
+                                }, 500);
+                              }}
+                              style={style}
+                            >
+                              Finalizar compra
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                : ''
+            }
+            {
+              loadingMessage
+                ? (
+                  <div className='flex flex-col gap-2 mr-6'>
+                    <div className='bg-gray-200 p-1.5 rounded-md w-fit'>
+                      <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="25px" width="25px" xmlns="http://www.w3.org/2000/svg"><circle cx="12.1" cy="12.1" r="1"></circle><circle cx="3" cy="12.1" r="1"></circle><circle cx="21" cy="12.1" r="1"></circle></svg>
+                    </div>
                   </div>
-                ))
+                )
                 : ''
             }
           </div>

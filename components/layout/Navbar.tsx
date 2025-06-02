@@ -352,17 +352,17 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                   </div>
                 </div>
               </>
-              : <div className='flex gap-4 justify-between'>
+              : <div className='flex gap-4 justify-between w-full lg:w-fit lg:ml-auto'>
                 <div className='gap-2 flex sm:hidden'>
                   {
                     storeData?.logo && storeData?.logo !== '' && design.header?.logo === 'Logo'
-                      ? <Link href='/'><Image className='h-[50px] py-0.5' src={`${storeData.logo}`} alt='Logo' width={320} height={150} /></Link>
+                      ? <Link href='/'><Image className='h-[50px] w-auto py-0.5' src={`${storeData.logo}`} alt='Logo' width={320} height={150} /></Link>
                       : storeData?.logoWhite && storeData?.logoWhite !== '' && design.header?.logo === 'Logo blanco'
-                        ? <Link href='/'><Image className='h-[50px] py-0.5' src={`${storeData.logoWhite}`} alt='Logo blanco' width={320} height={150} /></Link>
+                        ? <Link href='/'><Image className='h-[50px] w-auto py-0.5' src={`${storeData.logoWhite}`} alt='Logo blanco' width={320} height={150} /></Link>
                         : <Link href='/'><div className='h-[50px] flex'><p className='m-auto text-2xl font-medium'>SITIO WEB</p></div></Link>
                   }
                 </div>
-                <Link href='/tienda' className='mt-auto mb-auto text-sm text-neutral-500'>Continuar comprando</Link>
+                <Link href='/tienda' className='mt-auto mb-auto ml-auto text-sm text-neutral-500'>Continuar comprando</Link>
               </div>
           }
           </div>

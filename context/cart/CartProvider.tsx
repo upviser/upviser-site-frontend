@@ -8,7 +8,7 @@ import axios from 'axios'
 const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   const [cart, setCart] = useState<ICartProduct[]>()
-  const [cartView, setCartView] = useState('flex')
+  const [cartView, setCartView] = useState('hidden')
   const [cartPosition, setCartPosition] = useState('-mr-96')
   const [cartPc, setCartPc] = useState(true)
   const { data: session, status } = useSession()

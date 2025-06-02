@@ -35,7 +35,7 @@ const CartPage = ({ design, products, style }: { design: Design, products: IProd
       <div className='p-4 flex' style={{ backgroundColor: design.cartPage.bgColor, color: design.cartPage.textColor }}>
         <div className='m-auto w-[1280px] flex flex-col gap-4'>
           <h1 className='text-2xl sm:text-4xl font-medium'>Carrito</h1>
-          <div className='block gap-8 xl:flex'>
+          <div className='flex gap-4 xl:gap-8 flex-col xl:flex-row'>
             <div className='w-full xl:w-7/12'>
               {
                 cart?.length

@@ -232,14 +232,20 @@ export const Call = ({ calls, content, step, services, payment, storeData, index
                     ? (
                       <>
                         <p>Tipo: {calls.find(call => call._id === content.meeting)?.type?.map((typ, index) => index === 0 ? typ : ` - ${typ}`)}</p>
-                        <div className="flex flex-col gap-3">
-                          <p className="font-medium">Descripción:</p>
-                          <div onClick={() => console.log(calls.find(call => call._id === content.meeting)?.description)} className="flex flex-col gap-2">
-                            {
-                              calls.find(call => call._id === content.meeting)?.description?.split('\n').map(text => <p key={text}>{text}</p>)
-                            }
-                          </div>
-                        </div>
+                        {
+                          calls.find(call => call._id === content.meeting)?.description && calls.find(call => call._id === content.meeting)?.description !== ''
+                            ? (
+                              <div className="flex flex-col gap-3">
+                                <p className="font-medium">Descripción:</p>
+                                <div className="flex flex-col gap-2">
+                                  {
+                                    calls.find(call => call._id === content.meeting)?.description?.split('\n').map(text => <p key={text}>{text}</p>)
+                                  }
+                                </div>
+                              </div>
+                            )
+                            : ''
+                        }
                       </>
                     )
                     : ''

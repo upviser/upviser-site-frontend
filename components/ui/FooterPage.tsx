@@ -22,7 +22,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
             }
             {
               storeData?.phone && storeData?.phone !== ''
-                ? <p className='ext-sm'>+56{storeData.phone}</p>
+                ? <p className='text-sm'>+56{storeData.phone}</p>
                 : ''
             }
             {
@@ -51,7 +51,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
             </div>
           </div>
           <div className='flex flex-col gap-3'>
-            <h3>PAGINAS</h3>
+            <h3>PÁGINAS</h3>
             <div className='flex flex-col gap-1'>
               {
                 design.pages.filter(page => page.header).map(page => (
@@ -64,7 +64,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
             politics?.terms && politics?.terms !== '' || politics?.privacy && politics?.privacy !== '' || politics?.devoltions && politics?.devoltions !== '' || politics?.shipping && politics?.shipping !== '' || politics?.pay && politics?.pay !== ''
               ? (
                 <div className='flex flex-col gap-3'>
-                  <h3>POLITICAS</h3>
+                  <h3>POLÍTICAS</h3>
                   <div className='flex flex-col gap-1'>
                     {
                       politics.terms && politics.terms !== ''

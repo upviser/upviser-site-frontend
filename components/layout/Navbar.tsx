@@ -82,15 +82,13 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
           <div className='m-auto w-[1280px] flex justify-between py-1 sm:py-0'>
           <div className='hidden gap-2 sm:flex'>
             {
-              storeData?.logo && storeData?.logo !== '' && design.header?.logo === 'Logo' && pathname !== '/finalizar-compra'
+              storeData?.logo && storeData?.logo !== '' && design.header?.logo === 'Logo'
                 ? <Link href='/'><Image className={`w-auto h-[54px] py-2`} src={`${storeData.logo}`} alt='Logo' width={320} height={150} /></Link>
-                : storeData?.logoWhite && storeData?.logoWhite !== '' && design.header?.logo === 'Logo blanco' && pathname !== '/finalizar-compra'
+                : storeData?.logoWhite && storeData?.logoWhite !== '' && design.header?.logo === 'Logo blanco'
                   ? <Link href='/'><Image className={`w-auto h-[54px] py-2`} src={`${storeData.logoWhite}`} alt='Logo blanco' width={320} height={150} /></Link>
-                  : storeData?.logo && storeData?.logo !== '' && pathname !== '/finalizar-compra'
+                  : storeData?.logo && storeData?.logo !== ''
                     ? <Link href='/'><Image className={`w-auto h-[54px] py-2`} src={`${storeData.logo}`} alt='Logo' width={320} height={150} /></Link>
-                    : pathname !== '/finalizar-compra'
-                      ? <Link href='/'><div className='h-[50px] flex'><p className='m-auto text-2xl font-medium'>SITIO WEB</p></div></Link>
-                      : ''
+                    : <Link href='/'><div className='h-[50px] flex'><p className='m-auto text-2xl font-medium'>SITIO WEB</p></div></Link>
             }
           </div>
           {
@@ -168,13 +166,13 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                   }
                   {
                     products?.length
-                      ? cartPosition === ''
+                      ? cartPosition === '-mr-96'
                         ? (
                           <div>
                             <button onClick={() => {
                               setCartView('flex')
                               setTimeout(() => {
-                                setCartPosition('-ml-[410px]')
+                                setCartPosition('')
                               }, 10)
                             }} className='flex h-full mr-2'>
                               <svg className='m-auto cursor-pointer w-[17px]' role="presentation" viewBox="0 0 17 20">
@@ -194,7 +192,7 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                           )
                         : (
                           <button className='h-full flex mr-2' onClick={() => {
-                            setCartPosition('')
+                            setCartPosition('-mr-96')
                             setTimeout(() => {
                               setCartView('hidden')
                             }, 500)
@@ -314,13 +312,13 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                         )
                     }
                     {
-                      cartPosition === ''
+                      cartPosition === '-mr-96'
                         ? (
                           <div>
                             <button onClick={() => {
                               setCartView('flex')
                               setTimeout(() => {
-                                setCartPosition('-ml-[410px]')
+                                setCartPosition('')
                               }, 10)
                             }} className='flex h-full'>
                               <svg className='m-auto cursor-pointer w-[17px]' role="presentation" viewBox="0 0 17 20">
@@ -340,7 +338,7 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                           )
                         : (
                           <button onClick={() => {
-                            setCartPosition('')
+                            setCartPosition('-mr-96')
                             setTimeout(() => {
                               setCartView('hidden')
                             }, 500)
@@ -354,13 +352,13 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                   </div>
                 </div>
               </>
-              : <div className='flex gap-4 justify-between w-full'>
-                <div className='gap-2 flex'>
+              : <div className='flex gap-4 justify-between'>
+                <div className='gap-2 flex sm:hidden'>
                   {
                     storeData?.logo && storeData?.logo !== '' && design.header?.logo === 'Logo'
-                      ? <Link href='/'><Image className='h-[50px] w-fit py-1' src={`${storeData.logo}`} alt='Logo' width={320} height={150} /></Link>
+                      ? <Link href='/'><Image className='h-[50px] py-0.5' src={`${storeData.logo}`} alt='Logo' width={320} height={150} /></Link>
                       : storeData?.logoWhite && storeData?.logoWhite !== '' && design.header?.logo === 'Logo blanco'
-                        ? <Link href='/'><Image className='h-[50px] w-fit py-1' src={`${storeData.logoWhite}`} alt='Logo blanco' width={320} height={150} /></Link>
+                        ? <Link href='/'><Image className='h-[50px] py-0.5' src={`${storeData.logoWhite}`} alt='Logo blanco' width={320} height={150} /></Link>
                         : <Link href='/'><div className='h-[50px] flex'><p className='m-auto text-2xl font-medium'>SITIO WEB</p></div></Link>
                   }
                 </div>
@@ -396,31 +394,15 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
             </div>
           </div>
         </div>
-        <div className={`${cartView} ${cartPosition} ${cartPosition === '-ml-[410px]' ? 'bg-black/30' : ''} transition-all duration-500 -z-10 absolute top-[58px] sm:hidden`} style={{ height: 'calc(100vh - 58px)', width: 'calc(100% + 410px)' }}>
-          <div className='w-full ml-auto flex'>
-            <div onClick={() => {
-              setCartPosition('')
-              setTimeout(() => {
-                setCartView('hidden')
-              }, 500)
-            }} className='h-full w-full' />
-            <div className='h-fit flex w-full min-w-[307px] max-w-[360px] sm:w-96'>
-              <NavbarCart cartRef={cartRef} setCartView={setCartView} setCartPosition={setCartPosition} categories={categories} style={style} />
-            </div>
-          </div>
-        </div>
-        <div onClick={() => {
-          if (cartPc) {
-            setCartPosition('')
+        <div className={`${cartView} ${cartPosition === '' ? 'bg-black/30' : ''} transition-all duration-500 -z-10 absolute top-[58px] sm:top-[54px] w-full overflow-hidden`}>
+          <div onClick={() => {
+            setCartPosition('-mr-96')
             setTimeout(() => {
               setCartView('hidden')
             }, 500)
-          }
-        }} className={`hidden ${cartPosition} ${cartPosition === '-ml-[410px]' ? 'bg-black/30' : ''} -z-10 transition-all duration-500 absolute top-[54px] sm:${cartView}`} style={{ height: 'calc(100vh - 54px)', width: 'calc(100% + 410px)' }}>
-          <div className='w-full ml-auto mr-auto'>
-            <div className='ml-auto h-fit flex w-full sm:w-96'>
-              <NavbarCart cartRef={cartRef} setCartView={setCartView} setCartPc={setCartPc} setCartPosition={setCartPosition} categories={categories} style={style} />
-            </div>
+          }} style={{ width: 'calc(100% - 360px)' }} />
+          <div className={`${cartPosition} h-fit flex w-[360px] ml-auto transition-all duration-500`}>
+            <NavbarCart cartRef={cartRef} setCartView={setCartView} setCartPosition={setCartPosition} categories={categories} style={style} />
           </div>
         </div>
         <div className={`${index} w-full ${menu === '' ? 'bg-black/30' : ''} transition-colors duration-500 absolute z-30 justify-between 530:hidden`} style={{ top: '58px', height: 'calc(100vh - 58px)' }}>

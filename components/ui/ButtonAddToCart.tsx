@@ -76,7 +76,7 @@ export const ButtonAddToCart: React.FC<Props> = ({ tempCartProduct, style }) => 
     }
     setCartView('flex')
     setTimeout(() => {
-      setCartPosition('-ml-[410px]')
+      setCartPosition('')
     }, 10)
     setTimeout(() => {
       setText('Añadir al carrito')

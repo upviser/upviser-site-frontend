@@ -26,7 +26,7 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
   const user = session?.user as { firstName: string, lastName: string, email: string, _id: string, cart: ICartProduct[] }
 
   return (
-    <div ref={cartRef} onMouseEnter={() => setCartPc(false)} onMouseLeave={() => setCartPc(true)} className={`ml-auto flex flex-col gap-3 p-4 shadow-md bg-white z-40 w-full dark:bg-neutral-900 dark:border dark:border-neutral-800 sm:w-96`} style={{ height: 'calc(100vh - 49px)' }}>
+    <div ref={cartRef} onMouseEnter={() => setCartPc(false)} onMouseLeave={() => setCartPc(true)} onMouseMove={() => setCartPc(true)} className={`ml-auto flex flex-col gap-3 p-4 shadow-md bg-white z-40 dark:bg-neutral-900 dark:border dark:border-neutral-800 w-[360px]`} style={{ height: 'calc(100vh - 49px)' }}>
       <H3 config='border-b text-center pb-2 font-medium' text='Carrito' />
       {
         cart?.length
@@ -37,7 +37,7 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
                 <div key={product.slug} className='flex gap-1 justify-between mb-2'>
                   <div className='flex gap-2'>
                     <Link href={`/tienda/${product.category.slug}/${product.slug}`} onClick={() => {
-                      setCartPosition('')
+                      setCartPosition('-mr-96')
                       setTimeout(() => {
                         setCartView('hidden')
                       }, 500)
@@ -46,7 +46,7 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
                     </Link>
                     <div className='mt-auto mb-auto'>
                       <Link href={`/tienda/${product.category.slug}/${product.slug}`} onClick={() => {
-                        setCartPosition('')
+                        setCartPosition('-mr-96')
                         setTimeout(() => {
                           setCartView('hidden')
                         }, 500)
@@ -129,13 +129,13 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
             </div>
             <div className='mt-4'>
               <Link href='/finalizar-compra'><Button action={() => {
-                setCartPosition('')
+                setCartPosition('-mr-96')
                 setTimeout(() => {
                   setCartView('hidden')
                 }, 500)
               }} config='w-full' style={style}>Finalizar compra</Button></Link>
               <Link href='/carrito' onClick={() => {
-                setCartPosition('')
+                setCartPosition('-mr-96')
                 setTimeout(() => {
                   setCartView('hidden')
                 }, 500)
@@ -147,7 +147,7 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
             {
               categories?.map(category => (
                 <Link key={category._id} onClick={() => {
-                  setCartPosition('')
+                  setCartPosition('-mr-96')
                   setTimeout(() => {
                     setCartView('hidden')
                   }, 500)
@@ -155,7 +155,7 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
               ))
             }
             <Link href='/tienda'><Button action={() => {
-              setCartPosition('')
+              setCartPosition('-mr-96')
               setTimeout(() => {
                 setCartView('hidden')
               }, 500)

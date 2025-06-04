@@ -11,9 +11,10 @@ interface Props {
   setSell: any
   chilexpress: any
   style: any
+  sellRef: any
 }
 
-export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpress, style }) => {
+export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpress, style, sellRef }) => {
 
   const [regions, setRegions] = useState<Region[]>()
   const [citys, setCitys] = useState<City[]>()
@@ -45,6 +46,7 @@ export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpr
         })
         setCitys(request.data.coverageAreas)
         setSell({ ...sell, region: e.target.value })
+        sellRef.current = { ...sell, region: e.target.value }
       }
     
       const cityChange = async (e: any) => {
@@ -72,6 +74,7 @@ export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpr
         })
         setShipping(request.data.data.courierServiceOptions)
         setSell({ ...sell, city: e.target.value })
+        sellRef.current = { ...sell, city: e.target.value }
       }
 
   return (

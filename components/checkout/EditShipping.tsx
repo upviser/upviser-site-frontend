@@ -16,9 +16,10 @@ interface Props {
     setShipping: any
     chilexpress: any
     style: any
+    sellRef: any
 }
 
-export const EditShipping: React.FC<Props> = ({ shippingMouse, setShippingOpacity, setShippingView, shippingView, shippingOpacity, setShippingMouse, sell, inputChange, setSell, setShipping, chilexpress, style }) => {
+export const EditShipping: React.FC<Props> = ({ shippingMouse, setShippingOpacity, setShippingView, shippingView, shippingOpacity, setShippingMouse, sell, inputChange, setSell, setShipping, chilexpress, style, sellRef }) => {
   return (
     <div onClick={() => {
         if (!shippingMouse) {
@@ -38,7 +39,7 @@ export const EditShipping: React.FC<Props> = ({ shippingMouse, setShippingOpacit
             <p className='text-sm'>Deptartamento</p>
             <Input placeholder='Departamento (Opcional)' name='details' inputChange={inputChange} value={sell.details} style={style} />
           </div>
-          <Shipping setShipping={setShipping} sell={sell} setSell={setSell} chilexpress={chilexpress} style={style} />
+          <Shipping setShipping={setShipping} sell={sell} setSell={setSell} sellRef={sellRef} chilexpress={chilexpress} style={style} />
           <Button action={(e: any) => {
             e.preventDefault()
             setShippingOpacity('opacity-0')

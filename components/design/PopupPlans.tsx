@@ -46,6 +46,12 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
   const [paymentCompleted, setPaymentCompleted] = useState(false)
   const [formCompleted, setFormCompleted] = useState(false)
   const [idService, setIdService] = useState('')
+  const [pay, setPay] = useState('')
+  const [token, setToken] = useState('')
+  const [url, setUrl] = useState('')
+  const [transbankLoading, setTransbankLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
+  const [link, setLink] = useState('')
 
   const clientRef = useRef(client)
   const initializationRef = useRef({ amount: Number(service?.typePrice === '2 pagos' ? service?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.price) / 100 * 119 / 2 : Number(plan?.price) / 2 : service?.typePrice === 'Pago unico' ? service?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.price) / 100 * 119 : plan?.price : typePrice === 'Mensual' ? service?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.price) / 100 * 119 : plan?.price : service?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.anualPrice) / 100 * 119 : plan?.anualPrice) })
@@ -210,6 +216,35 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
         return null; // No renderizar CardPayment si la condición no se cumple
       }, [initializationRef.current.amount]);
 
+    const mercadoSubmit = async (e: any) => {
+      e.preventDefault()
+      if (!submitLoading) {
+        setSubmitLoading(true)
+        setError('')
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
+          if (emailRegex.test(clientRef.current.email)) {
+            let currentClient = clientRef.current
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+            if (res.data.email) {
+              currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago iniciado' : 'Pago iniciado'
+            } else {
+              currentClient.services![0].payStatus = 'Pago iniciado'
+            }
+            const service = services?.find(service => service._id === content.service?.service)
+            currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+            const price = Number(initializationRef.current.amount)
+            const newEventId = new Date().getTime().toString()
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: currentClient.services![0].payStatus, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
+            fbq('track', 'AddPaymentInfo', { content_name: service?._id, currency: "clp", value: initializationRef.current.amount, contents: { id: service?._id, item_price: typePrice === 'Mensual' ? services.find(service => service._id && content.service?.service)?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.price) / 100 * 119 : plan?.price : services.find(service => service._id && content.service?.service)?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.anualPrice) / 100 * 119 : plan?.anualPrice, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+            localStorage.setItem('pay', JSON.stringify(response.data))
+          }
+        }
+        window.location.href = link
+      }
+    }
+
   return (
     <div className={`${popup.view} ${popup.opacity} transition-opacity duration-200 w-full h-full top-0 fixed bg-black/30 flex z-50 px-4`}>
       <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} max-w-[800px] transition-transform duration-200 w-full rounded-2xl max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }}>
@@ -351,17 +386,117 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                             {
                               content.info.video === 'Realizar pago'
                                 ? (
-                                  <div className='flex flex-col gap-6 px-2 md:px-4'>
-                                    <div className='flex flex-col'>
-                                      {cardPaymentMemo}
-                                      <div id="cardPaymentBrick_container"></div>
-                                      {
-                                        error !== ''
-                                          ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
-                                          : ''
-                                      }
+                                  <>
+                                    <div className='flex flex-col gap-4'>
+                                      <H3 text='Pago' config='font-medium px-6 md:px-8' color={content.info.textColor} />
+                                      <div className='flex flex-col gap-2 w-full'>
+                                        {
+                                          payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
+                                            ? (
+                                              <div className='w-full px-6 md:px-8'>
+                                                <button className='flex gap-2 p-2 border w-full' onClick={() => setPay('MercadoPago')} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                                  <input type='radio' className='my-auto' checked={pay === 'MercadoPago'} />
+                                                  <p>Tarjeta de Credito o Debito</p>
+                                                </button>
+                                                {
+                                                  pay === 'MercadoPago'
+                                                    ? (
+                                                      <>
+                                                        {cardPaymentMemo}
+                                                        {
+                                                          error !== ''
+                                                            ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                            : ''
+                                                        }
+                                                      </>
+                                                    )
+                                                    : ''
+                                                }
+                                              </div>
+                                            )
+                                            : ''
+                                        }
+                                        {
+                                          payment.transbank.active && payment.transbank.apiKey && payment.transbank.apiKey !== '' && payment.transbank.commerceCode && payment.transbank.commerceCode !== ''
+                                            ? (
+                                              <div className='w-full px-6 md:px-8'>
+                                                <button className='flex gap-2 p-2 border w-full' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} onClick={async () => {
+                                                  setPay('WebPay Plus')
+                                                  const pago = {
+                                                    amount: initializationRef.current.amount,
+                                                    returnUrl: `${process.env.NEXT_PUBLIC_WEB_URL}/procesando-pago`
+                                                  }
+                                                  const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/create`, pago)
+                                                  setToken(response.data.token)
+                                                  setUrl(response.data.url)
+                                                }}>
+                                                  <input type='radio' className='my-auto' checked={pay === 'WebPay Plus'} />
+                                                  <p>WebPay Plus</p>
+                                                </button>
+                                                {
+                                                  pay === 'WebPay Plus'
+                                                    ? (
+                                                      <form action={url} method="POST" id='formTransbank' className='mt-2'>
+                                                        <input type="hidden" name="token_ws" value={token} />
+                                                        <Button style={style} action={async (e: any) => {
+                                                          e.preventDefault()
+                                                          if (!transbankLoading) {
+                                                            setTransbankLoading(true)
+                                                            setError('')
+                                                            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                                                            if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
+                                                              if (emailRegex.test(clientRef.current.email)) {
+                                                                let currentClient = clientRef.current
+                                                                const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+                                                                if (res.data.email) {
+                                                                  currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago iniciado' : 'Pago iniciado'
+                                                                } else {
+                                                                  currentClient.services![0].payStatus = 'Pago iniciado'
+                                                                }
+                                                                const service = services?.find(service => service._id === content.service?.service)
+                                                                currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
+                                                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                                                                const price = Number(initializationRef.current.amount)
+                                                                const newEventId = new Date().getTime().toString()
+                                                                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
+                                                                fbq('track', 'AddPaymentInfo', { content_name: service?._id, currency: "clp", value: initializationRef.current.amount, contents: { id: service?._id, item_price: typePrice === 'Mensual' ? services.find(service => service._id && content.service?.service)?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.price) / 100 * 119 : plan?.price : services.find(service => service._id && content.service?.service)?.typePay === 'Hay que agregarle el IVA al precio' ? Number(plan?.anualPrice) / 100 * 119 : plan?.anualPrice, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                                                                localStorage.setItem('pay', JSON.stringify(response.data))
+                                                                const form = document.getElementById('formTransbank') as HTMLFormElement
+                                                                if (form) {
+                                                                  form.submit()
+                                                                }
+                                                              }
+                                                            }
+                                                          }
+                                                        }} loading={transbankLoading} config='w-[350px]'>Pagar con WebPay Plus</Button>
+                                                      </form>
+                                                    )
+                                                    : ''
+                                                }
+                                              </div>
+                                            )
+                                            : ''
+                                        }
+                                        {
+                                          payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
+                                            ? (
+                                              <div className='w-full px-6 pb-6 md:px-8 md:pb-8'>
+                                                <button className='flex gap-2 p-2 border w-full' onClick={() => setPay('MercadoPagoPro')} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                                  <input type='radio' className='my-auto' checked={pay === 'MercadoPagoPro'} />
+                                                  <p>MercadoPago</p>
+                                                </button>
+                                                {
+                                                  pay === 'MercadoPagoPro'
+                                                    ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
+                                                    : ''
+                                                }
+                                              </div>
+                                            )
+                                            : ''
+                                        }
+                                      </div>
                                     </div>
-                                  </div>
+                                  </>
                                 )
                                 : <div className='flex flex-col gap-6 pb-6 px-6 md:pb-8 md:px-8 w-full'><Button style={style} config='w-full' loading={loading} action={async (e: any) => {
                                   if (!loading) {

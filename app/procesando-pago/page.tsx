@@ -55,13 +55,44 @@ export default function PayProcess () {
         }
       }
     } else if (status) {
+      const pay = JSON.parse(localStorage.getItem('pay')!)
       const sell = JSON.parse(localStorage.getItem('sell')!)
-      if (status === 'approved') {
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago realizado', sell: sell })
-        router.push('/gracias-por-comprar')
-      } else {
-        await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })
-        router.push('/pago-fallido')
+      if (pay) {
+        if (status === 'approved') {
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/pay/${pay._id}`, { state: 'Pago realizado', pay: pay })
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/services`)
+          const service = JSON.parse(localStorage.getItem('service')!)
+          service.step = response.data.find((ser: any) => ser._id === service.service).steps[response.data.find((ser: any) => ser._id === service.service).steps.find((step: any) => step._id === service.step) ? response.data.find((ser: any) => ser._id === service.service).steps.findIndex((step: any) => step._id === service.step) + 1 : 0]._id
+          service.payStatus =
+            service.payStatus === 'Pago iniciado'
+              ? 'Pago realizado'
+              : service.payStatus === 'Segundo pago iniciado'
+              ? 'Segundo pago realizado'
+              : '';
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: [service] })
+          router.push('/gracias-por-comprar')
+        } else {
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/pay/${pay._id}`, { state: 'Pago no realizado' })
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${pay.email}`)
+          const services = [...res.data.services];
+          const serviceToUpdate = services.find(service => service.service === pay.service)
+          serviceToUpdate.payStatus =
+            serviceToUpdate.payStatus === 'Pago iniciado'
+              ? 'Pago no realizado'
+              : serviceToUpdate.payStatus === 'Segundo pago iniciado'
+              ? 'Segundo pago no realizado'
+              : '';
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: serviceToUpdate })
+          router.push('/pago-fallido')
+        }
+      } else if (sell) {
+        if (status === 'approved') {
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago realizado', sell: sell })
+          router.push('/gracias-por-comprar')
+        } else {
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })
+          router.push('/pago-fallido')
+        }
       }
     }
   }

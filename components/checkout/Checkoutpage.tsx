@@ -1,5 +1,5 @@
 "use client"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import Cookies from 'js-cookie'
 import { Design, ICartProduct, IClient, IProduct, ISell, IShipping, IStoreData } from "@/interfaces"
 import { useSession } from "next-auth/react"
@@ -22,6 +22,8 @@ interface Props {
 
 export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, payment, design }) => {
 
+  const {cart, setCart} = useContext(CartContext)
+  
   const [sell, setSell] = useState<ISell>({
     firstName: Cookies.get('firstName') || '',
     lastName: Cookies.get('lastName') || '',
@@ -33,7 +35,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
     shipping: 0,
     pay: '',
     state: 'Pedido realizado',
-    total: 0,
+    total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0),
     fbp: Cookies.get('_fbp'),
     fbc: Cookies.get('_fbc'),
     shippingMethod: '',
@@ -54,8 +56,11 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   const [token, setToken] = useState('')
   const [url, setUrl] = useState('')
 
+  const sellRef = useRef(sell)
+  const initializationRef = useRef({ amount: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) })
+  const saveDataRef = useRef(false)
+
   const { data: session, status } = useSession()
-  const {cart, setCart} = useContext(CartContext)
 
   const user = session?.user as { firstName: string, lastName: string, email: string, _id: string }
 
@@ -67,6 +72,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
       const data: IClient = response.data
       if (data) {
         setSell({...sell, address: data.address ? data.address : '', city: data.city ? data.city : '', email: data.email, firstName: data.firstName ? data.firstName : '', lastName: data.lastName ? data.lastName : '', phone: data.phone ? Number(data.phone) : undefined, region: data.region ? data.region : '', total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0), cart: cart!})
+        sellRef.current = {...sell, address: data.address ? data.address : '', city: data.city ? data.city : '', email: data.email, firstName: data.firstName ? data.firstName : '', lastName: data.lastName ? data.lastName : '', phone: data.phone ? Number(data.phone) : undefined, region: data.region ? data.region : '', total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0), cart: cart!}
         setClientId(data._id!)
       }
       if (data.city && data.region) {
@@ -112,7 +118,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
     }
     if (typeof window !== 'undefined') {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/information`, { cart: cart, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc') })
-      fbq('track', 'AddPaymentInfo', {contents: cart?.map(product => ({ id: product._id, quantity: product.quantity, category: product.category.category, item_price: product.price, title: product.name })), currency: "clp", value: cart!.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping), content_ids: cart?.map(product => product._id), event_id: res.data._id})
+      fbq('track', 'InitiateCheckout', {contents: cart?.map(product => ({ id: product._id, quantity: product.quantity, category: product.category.category, item_price: product.price, title: product.name })), currency: "clp", value: cart!.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping), content_ids: cart?.map(product => product._id), event_id: res.data._id})
     }
   }
 
@@ -133,6 +139,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
       const carritoVerificado = await verificarStockCarrito(cartGuardado);
       setCart(carritoVerificado);
       setSell({ ...sell, cart: carritoVerificado })
+      sellRef.current = { ...sell, cart: carritoVerificado }
       localStorage.setItem("cart", JSON.stringify(carritoVerificado));
       if (!carritoVerificado.length) {
         router.push('/carrito')
@@ -144,6 +151,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
 
   const inputChange = async (e: any) => {
     setSell({ ...sell, [e.target.name]: e.target.value, buyOrder: `${storeData?.name ? storeData.name : 'ORDEN'}${Math.floor(Math.random() * 10000) + 1}` })
+    sellRef.current = { ...sell, [e.target.name]: e.target.value, buyOrder: `${storeData?.name ? storeData.name : 'ORDEN'}${Math.floor(Math.random() * 10000) + 1}` }
     if (e.target.name === 'pay' && e.target.value === 'WebPay Plus') {
       const pago = {
         amount: sell.total,
@@ -170,25 +178,33 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
           ? (
             <div style={{ backgroundColor: design.checkoutPage.bgColor, color: design.checkoutPage.textColor }}>
               <EditData contactMouse={contactMouse} setContactOpacity={setContactOpacity} setContactView={setContactView} contactView={contactView} contactOpacity={contactOpacity} setContactMouse={setContactMouse} inputChange={inputChange} sell={sell} style={style} />
-              <EditShipping shippingMouse={shippingMouse} setShippingOpacity={setShippingOpacity} setShippingView={setShippingView} shippingView={shippingView} shippingOpacity={shippingOpacity} setShippingMouse={setShippingMouse} sell={sell} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} />
+              <EditShipping shippingMouse={shippingMouse} setShippingOpacity={setShippingOpacity} setShippingView={setShippingView} shippingView={shippingView} shippingOpacity={shippingOpacity} setShippingMouse={setShippingMouse} sell={sell} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} sellRef={sellRef} />
               <ResumePhone cart={cart} sell={sell} style={style} design={design} />
               <div className='mt-28 flex p-4 xl:mt-0'>
                 <form className='w-[1280px] m-auto block xl:flex' id='formBuy'>
                   <div className='w-full flex flex-col gap-6 pr-0 xl:w-7/12 xl:pr-8'>
                     <h1 className="font-medium text-2xl sm:text-4xl">Finalizar compra</h1>
-                    <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} />
-                    <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} />
+                    <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} />
+                    <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} />
                     {
                       status === 'authenticated'
                         ? ''
                         : (
                           <div className='flex gap-2 mb-4'>
-                            <input type='checkbox' checked={saveData} onChange={(e: any) => e.target.checked ? setSaveData(true) : setSaveData(false)} />
+                            <input type='checkbox' checked={saveData} onChange={(e: any) => {
+                              if (e.target.checked) {
+                                setSaveData(true)
+                                saveDataRef.current = true
+                              } else {
+                                setSaveData(false)
+                                saveDataRef.current = false
+                              }
+                            }} />
                             <span className='text-sm text-neutral-400'>Guardar datos para poder comprar más rapido la proxima vez</span>
                           </div>
                         )
                     }
-                    <ButtonPay sell={sell} clientId={clientId} saveData={saveData} token={token} link={link} url={url} style={style} />
+                    <ButtonPay sell={sell} clientId={clientId} saveData={saveData} token={token} link={link} url={url} style={style} payment={payment} sellRef={sellRef} initializationRef={initializationRef} saveDataRef={saveDataRef} />
                   </div>
                   <Resume cart={cart} sell={sell} style={style} design={design} />
                 </form>

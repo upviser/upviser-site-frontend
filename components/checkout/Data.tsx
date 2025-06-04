@@ -16,9 +16,10 @@ interface Props {
     chilexpress: any
     style: any
     design: any
+    sellRef: any
 }
 
-export const Data: React.FC<Props> = ({ status, sell, setContactView, setContactOpacity, setShippingView, setShippingOpacity, inputChange, setSell, setShipping, chilexpress, style, design }) => {
+export const Data: React.FC<Props> = ({ status, sell, setContactView, setContactOpacity, setShippingView, setShippingOpacity, inputChange, setSell, setShipping, chilexpress, style, design, sellRef }) => {
   return (
     <>
       {
@@ -96,7 +97,7 @@ export const Data: React.FC<Props> = ({ status, sell, setContactView, setContact
                   <p className='text-sm'>Detalles (Opcional)</p>
                   <Input inputChange={inputChange} value={sell.details!} type={'text'} placeholder={'Detalles'} name='details' text='text-sm' style={style} />
                 </div>
-                <Shipping setShipping={setShipping} sell={sell} setSell={setSell} chilexpress={chilexpress} style={style} />
+                <Shipping setShipping={setShipping} sell={sell} setSell={setSell} chilexpress={chilexpress} style={style} sellRef={sellRef} />
                 <div className='flex flex-col gap-2'>
                   <p className='text-sm'>Teléfono</p>
                   <div className='flex gap-2'>

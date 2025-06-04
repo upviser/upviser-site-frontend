@@ -29,7 +29,8 @@ const PageBuySuccess = () => {
       localStorage.setItem('service', '')
     } else if (localStorage.getItem('sell')) {
       const sell: ISell = JSON.parse(localStorage.getItem('sell')!)
-      fbq('track', 'Purchase', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+      fbq('track', 'Purchase', {first_name: sell.firstName, last_name: sell.lastName, email: sell.email, phone: sell.phone ? `56${sell.phone}` : undefined,contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+      socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: 'Venta de productos de la tienda', url: '/pagos', view: false })
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { email: sell.email, firstName: sell.firstName, lastName: sell.lastName, phone: sell.phone, address: sell.address, departament: sell.details, region: sell.region, city: sell.city, tags: sell.subscription ? ['Clientes', 'Suscriptores'] : ['Clientes'] })
       localStorage.setItem('sell', '')
       localStorage.setItem('cart', '')

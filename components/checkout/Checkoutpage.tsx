@@ -55,6 +55,8 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   const [link, setLink] = useState('')
   const [token, setToken] = useState('')
   const [url, setUrl] = useState('')
+  const [paymentCompleted, setPaymentCompleted] = useState(false)
+  const [paymentFailed, setPaymentFailed] = useState(false)
 
   const sellRef = useRef(sell)
   const initializationRef = useRef({ amount: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) })
@@ -183,28 +185,49 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
               <div className='mt-28 flex p-4 xl:mt-0'>
                 <form className='w-[1280px] m-auto block xl:flex' id='formBuy'>
                   <div className='w-full flex flex-col gap-6 pr-0 xl:w-7/12 xl:pr-8'>
-                    <h1 className="font-medium text-2xl sm:text-4xl">Finalizar compra</h1>
-                    <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} />
-                    <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} />
                     {
-                      status === 'authenticated'
-                        ? ''
-                        : (
-                          <div className='flex gap-2 mb-4'>
-                            <input type='checkbox' checked={saveData} onChange={(e: any) => {
-                              if (e.target.checked) {
-                                setSaveData(true)
-                                saveDataRef.current = true
-                              } else {
-                                setSaveData(false)
-                                saveDataRef.current = false
-                              }
-                            }} />
-                            <span className='text-sm text-neutral-400'>Guardar datos para poder comprar más rapido la proxima vez</span>
+                      paymentCompleted
+                        ? (
+                          <div className='flex flex-col gap-6 py-20'>
+                            <svg className='m-auto' stroke="currentColor" fill="currentColor" stroke-width="0" version="1" viewBox="0 0 48 48" enable-background="new 0 0 48 48" height="100px" width="100px" xmlns="http://www.w3.org/2000/svg"><polygon fill="#8BC34A" points="24,3 28.7,6.6 34.5,5.8 36.7,11.3 42.2,13.5 41.4,19.3 45,24 41.4,28.7 42.2,34.5 36.7,36.7 34.5,42.2 28.7,41.4 24,45 19.3,41.4 13.5,42.2 11.3,36.7 5.8,34.5 6.6,28.7 3,24 6.6,19.3 5.8,13.5 11.3,11.3 13.5,5.8 19.3,6.6"></polygon><polygon fill="#CCFF90" points="34.6,14.6 21,28.2 15.4,22.6 12.6,25.4 21,33.8 37.4,17.4"></polygon></svg>
+                            <p className='text-center mx-auto text-3xl font-medium'>Pago realizado con exito</p>
+                            <p className='text-center mx-auto text-lg'>Recibiras un correo con toda la información.</p>
                           </div>
                         )
+                        : paymentFailed
+                          ? (
+                            <div className='flex flex-col gap-6 py-20'>
+                              <p className='text-center mx-auto text-3xl font-medium'>Pago fallido</p>
+                              <p className='text-center mx-auto text-lg'>Vuelvelo a intentar más tarde.</p>
+                            </div>
+                          )
+                          : (
+                            <>
+                              <h1 className="font-medium text-2xl sm:text-4xl">Finalizar compra</h1>
+                              <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} />
+                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} />
+                              {
+                                status === 'authenticated'
+                                  ? ''
+                                  : (
+                                    <div className='flex gap-2 mb-4'>
+                                      <input type='checkbox' checked={saveData} onChange={(e: any) => {
+                                        if (e.target.checked) {
+                                          setSaveData(true)
+                                          saveDataRef.current = true
+                                        } else {
+                                          setSaveData(false)
+                                          saveDataRef.current = false
+                                        }
+                                      }} />
+                                      <span className='text-sm text-neutral-400'>Guardar datos para poder comprar más rapido la proxima vez</span>
+                                    </div>
+                                  )
+                              }
+                              <ButtonPay sell={sell} clientId={clientId} saveData={saveData} token={token} link={link} url={url} style={style} payment={payment} sellRef={sellRef} initializationRef={initializationRef} saveDataRef={saveDataRef} setPaymentCompleted={setPaymentCompleted} setPaymentFailed={setPaymentFailed} />
+                            </>
+                          )
                     }
-                    <ButtonPay sell={sell} clientId={clientId} saveData={saveData} token={token} link={link} url={url} style={style} payment={payment} sellRef={sellRef} initializationRef={initializationRef} saveDataRef={saveDataRef} />
                   </div>
                   <Resume cart={cart} sell={sell} style={style} design={design} />
                 </form>

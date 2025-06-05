@@ -17,13 +17,11 @@ const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/`, {
 
 declare const fbq: Function
 
-export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, payment, sellRef, initializationRef, saveDataRef }: { sell: ISell, clientId: string, saveData: any, token: string, link: string, url: string, style: any, payment: IPayment, sellRef: any, initializationRef: any, saveDataRef: any }) => {
+export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, payment, sellRef, initializationRef, saveDataRef, setPaymentCompleted, setPaymentFailed }: { sell: ISell, clientId: string, saveData: any, token: string, link: string, url: string, style: any, payment: IPayment, sellRef: any, initializationRef: any, saveDataRef: any, setPaymentCompleted: any, setPaymentFailed: any }) => {
 
     const [submitLoading, setSubmitLoading] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [paymentCompleted, setPaymentCompleted] = useState(false)
-    const [paymentFailed, setPaymentFailed] = useState(false)
     const [loadingPayment, setLoadingPayment] = useState(false)
 
     initMercadoPago(payment?.mercadoPago.publicKey!)

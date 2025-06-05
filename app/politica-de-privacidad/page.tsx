@@ -12,7 +12,7 @@ export default async function Page () {
   return (
     <div className="w-full p-4 flex">
       <div className="w-full max-w-[1280px] m-auto flex flex-col gap-4">
-        <H1 text="Políticas de privacidad" />
+        <H1 text="Política de privacidad" />
         <p>{politics.privacy}</p>
       </div>
     </div>

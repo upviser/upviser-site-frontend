@@ -73,7 +73,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
                     }
                     {
                       politics.privacy && politics.privacy !== ''
-                        ? <Link className='block text-sm mb-1' href='/politicas-de-privacidad'>Políticas de privacidad</Link>
+                        ? <Link className='block text-sm mb-1' href='/politicas-de-privacidad'>Política de privacidad</Link>
                         : ''
                     }
                     {

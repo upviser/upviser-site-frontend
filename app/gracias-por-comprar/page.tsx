@@ -27,6 +27,7 @@ const PageBuySuccess = () => {
       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: '', url: '/pagos', view: false })
       localStorage.setItem('pay', '')
       localStorage.setItem('service', '')
+      localStorage.setItem('service2', '')
     } else if (localStorage.getItem('sell')) {
       const sell: ISell = JSON.parse(localStorage.getItem('sell')!)
       fbq('track', 'Purchase', {first_name: sell.firstName, last_name: sell.lastName, email: sell.email, phone: sell.phone ? `56${sell.phone}` : undefined,contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})

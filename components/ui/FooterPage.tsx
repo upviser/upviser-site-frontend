@@ -73,12 +73,12 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
                     }
                     {
                       politics.privacy && politics.privacy !== ''
-                        ? <Link className='block text-sm mb-1' href='/politicas-de-privacidad'>Política de privacidad</Link>
+                        ? <Link className='block text-sm mb-1' href='/politica-de-privacidad'>Política de privacidad</Link>
                         : ''
                     }
                     {
                       politics.devoltions && politics.devoltions !== ''
-                        ? <Link className='block text-sm mb-1' href='/politicas-de-devoluciones'>Políticas de devoluciones</Link>
+                        ? <Link className='block text-sm mb-1' href='/politica-de-devoluciones'>Política de devoluciones</Link>
                         : ''
                     }
                     {

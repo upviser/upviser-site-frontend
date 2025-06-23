@@ -1,7 +1,7 @@
 "use client"
 import { IDesign, IForm, IPayment, IPlan, IService } from '@/interfaces'
 import React, { useEffect, useRef, useState } from 'react'
-import { Button, H1, H2, P } from '../ui'
+import { Button, Check, H1, H2, P } from '../ui'
 import { NumberFormat } from '@/utils'
 import { PopupPlans } from './PopupPlans'
 
@@ -262,7 +262,7 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
                                   <p className='font-medium text-lg'>{index === 0 ? 'Funcionalidades:' : `Todo lo anterior más:`}</p>
                                   <div className='flex flex-col gap-2'>
                                     {
-                                      plan.characteristics?.map(characteristic => characteristic ? <p key={characteristic}>{characteristic}</p> : '')
+                                      plan.characteristics?.map(characteristic => characteristic ? <div key={characteristic} className='flex gap-2'><Check config='my-auto' style={style} /><p>{characteristic}</p></div> : '')
                                     }
                                   </div>
                                 </>

@@ -210,6 +210,7 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
       <PopupPlans popup={popup} setPopup={setPopup} plan={plan} services={services} payment={payment} content={content} step={step} style={style} typePrice={typePrice} forms={forms} />
       <div onMouseUp={() => setIsDragging(false)} className={`py-10 md:py-20 px-4 m-auto w-full flex`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}`, color: content.info.textColor }}>
         <div className='flex flex-col gap-8 m-auto w-full max-w-[1280px]'>
+          <div className='flex flex-col gap-4'>
           {
             content.info.title && content.info.title !== ''
               ? (
@@ -242,6 +243,7 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
               )
               : ''
           }
+          </div>
           {
             services?.find(service => service._id === content.service?.service)?.plans?.plans.length
               ? (

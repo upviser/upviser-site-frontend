@@ -258,9 +258,15 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
               <>
                 <div className='flex flex-col gap-4 sticky top-0 bg-white border-b z-50 p-6 md:p-8'>
                   <p className='text-center text-2xl font-medium'>{plan?.name}</p>
-                  <div className='flex gap-4 w-fit m-auto'>
-                    <p className='text-center text-3xl font-semibold'>${NumberFormat(initialization.amount)}</p>
-                    <p className='my-auto'>/ {typePrice === 'Mensual' ? 'Mes' : 'Anual'}</p>
+                  <div className='flex flex-col gap-2'>
+                    <div className='flex flex-col gap-1'>
+                      <p className='text-center text-lg'>Neto: ${NumberFormat(initialization.amount / 119 * 100)}</p>
+                      <p className='text-center text-lg'>IVA: ${NumberFormat(initialization.amount / 119 * 19)}</p>
+                    </div>
+                    <div className='flex gap-4 w-fit m-auto'>
+                      <p className='text-center text-3xl font-semibold'>${NumberFormat(initialization.amount)}</p>
+                      <p className='my-auto'>/ {typePrice === 'Mensual' ? 'Mes' : 'Anual'}</p>
+                    </div>
                   </div>
                 </div>
                 <div className='flex flex-col'>

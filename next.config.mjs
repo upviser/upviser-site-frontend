@@ -13,6 +13,11 @@ const nextConfig = {
         hostname: 'upviser-website.b-cdn.net',
         port: '',
         pathname: '/**'
+      }, {
+        protocol: 'https',
+        hostname: 'tienda-upviser.b-cdn.net',
+        port: '',
+        pathname: '/**'
       }
     ]
   }

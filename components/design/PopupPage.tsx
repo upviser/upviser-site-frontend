@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button, Calendar, Input } from '../ui'
 import axios from 'axios'
 import { usePathname, useRouter } from 'next/navigation'
-import { Design, ICall, IClient, IForm, IPayment } from '@/interfaces'
+import { Design, ICall, IClient, IForm, IPayment, IStoreData } from '@/interfaces'
 import Cookies from 'js-cookie'
+import Image from 'next/image'
 
 declare const fbq: Function
 
@@ -17,9 +18,10 @@ interface Props {
     forms: IForm[]
     payment: IPayment
     style?: any
+    storeData: IStoreData
 }
 
-export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, calls, forms, payment, style }) => {
+export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, calls, forms, payment, style, storeData }) => {
 
   const [message, setMessage] = useState('')
   const [clientData, setClientData] = useState<IClient>({ email: '' })
@@ -52,7 +54,7 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
         {
           content === 'Abrir popup'
             ? (
-              <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${calls.find(call => call._id === content) ? 'max-w-[800px]' : 'max-w-[600px]'} ${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} transition-transform duration-200 w-full p-6 md:p-8 rounded-2xl max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col gap-4`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }}>
+              <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${calls.find(call => call._id === content) ? 'max-w-[800px]' : 'max-w-[600px]'} ${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} transition-transform duration-200 w-full p-6 md:p-8 max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col gap-4`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }}>
                 {
                   message !== ''
                     ? <p>{message}</p>
@@ -70,21 +72,27 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                         }
                         {
                           design?.popup?.content && design.popup.content !== ''
-                            ? calls.find(call => call._id === content)
+                            ? calls.find(call => call._id === design?.popup?.content)
                               ? (
                                 <div className="m-auto w-full max-w-[1280px]">
-                                  <div className="lg:flex">
+                                  <div className="lg:flex" style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: '#111111', backgroundColor: '#ffffff' }}>
                                     <div className="p-6 md:p-8 border-b lg:border-b-0 lg:border-r flex flex-col gap-8 w-full lg:w-5/12">
                                       <div className="flex flex-col gap-3">
-                                        <p className="text-sm font-medium">CARMEN ORELLANA</p>
                                         {
-                                          calls.find(call => call._id === content)
+                                          storeData?.logo && storeData.logo !== ''
+                                            ? <Image src={storeData.logo} alt={`Imagen logo ${storeData.name}`} width={200} height={150} className='w-40' />
+                                            : storeData?.logoWhite && storeData.logoWhite !== ''
+                                              ? <Image src={storeData.logoWhite} alt={`Imagen logo ${storeData.name}`} width={200} height={150} className='w-40' />
+                                              : ''
+                                        }
+                                        {
+                                          calls.find(call => call._id === design?.popup?.content)
                                             ? (
                                               <>
-                                                <p className="text-xl font-semibold">{calls.find(call => call._id === content)?.nameMeeting}</p>
+                                                <p className="text-xl font-semibold">{calls.find(call => call._id === design?.popup?.content)?.nameMeeting}</p>
                                                 <div className="flex gap-2">
                                                   <svg className="w-5 text-gray-500" data-id="details-item-icon" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" role="img"><path d="M.5 5a4.5 4.5 0 1 0 9 0 4.5 4.5 0 1 0-9 0Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 3.269V5l1.759 2.052" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                                  <p className="text-gray-500">{calls.find(call => call._id === content)?.duration}</p>
+                                                  <p className="text-gray-500">{calls.find(call => call._id === design?.popup?.content)?.duration}</p>
                                                 </div>
                                               </>
                                             )
@@ -92,13 +100,13 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                                         }
                                       </div>
                                       {
-                                        calls.find(call => call._id === content)
+                                        calls.find(call => call._id === design?.popup?.content) && calls.find(call => call._id === design?.popup?.content)?.description !== ''
                                           ? (
                                             <div className="flex flex-col gap-3">
                                               <p className="font-medium">Descripción:</p>
-                                              <div onClick={() => console.log(calls.find(call => call._id === content)?.description)} className="flex flex-col gap-2">
+                                              <div onClick={() => console.log(calls.find(call => call._id === design?.popup?.content)?.description)} className="flex flex-col gap-2">
                                                 {
-                                                  calls.find(call => call._id === content)?.description?.split('\n').map(text => <p key={text}>{text}</p>)
+                                                  calls.find(call => call._id === design?.popup?.content)?.description?.split('\n').map(text => <p key={text}>{text}</p>)
                                                 }
                                               </div>
                                             </div>
@@ -107,42 +115,78 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                                       }
                                     </div>
                                     <div className="p-6 w-full lg:w-7/12">
-                                      <Calendar newClient={clientData} setNewClient={setClientData} call={calls.find(call => call._id === content)!} tags={calls.find(call => call._id === content)?.tags!} meeting={calls.find(call => call._id === content)?.nameMeeting!} payment={payment} />
+                                      <Calendar newClient={clientData} setNewClient={setClientData} call={calls.find(call => call._id === content)!} tags={calls.find(call => call._id === content)?.tags!} meeting={calls.find(call => call._id === content)?.nameMeeting!} payment={payment} style={style} />
                                     </div>
                                   </div>
                                 </div>
                               )
-                              : forms?.find(form => form._id === content)
+                              : forms?.find(form => form._id === design?.popup?.content)
                                 ? (
                                   <form className="flex w-full" onSubmit={async (e: any) => {
                                     e.preventDefault()
                                     if (!loading) {
                                       setLoading(true)
                                       setError('')
-                                      const form = forms.find(form => form._id === content)
+                                      
+                                      const form = forms.find(form => form._id === design?.popup?.content)
                                       let valid = true
                                       let errorMessage = ''
+                                  
+                                      // Función para obtener el valor del campo desde client o client.data
+                                      const getClientValue = (name: string) => clientData[name] || clientData.data?.find(dat => dat.name === name)?.value;
+                                  
                                       form?.labels.forEach(label => {
-                                        if (label.data && (!clientData[label.data] || clientData[label.data].trim() === '')) {
+                                        const value = getClientValue(label.data)
+                                        
+                                        if (label.data && (!value || value.trim() === '')) {
                                           valid = false
                                           errorMessage = `Por favor, completa el campo ${label.text || label.name}.`
                                         }
                                       })
+                                  
                                       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
                                       if (clientData.email && !emailRegex.test(clientData.email)) {
                                         valid = false
                                         errorMessage = 'Por favor, ingresa un correo electrónico válido.'
                                       }
+                                  
                                       if (!valid) {
                                         setError(errorMessage)
                                         setLoading(false)
                                         return
                                       }
+
                                       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, clientData)
                                       const newEventId = new Date().getTime().toString()
-                                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, { firstName: clientData.firstName, lastName: clientData.lastName, email: clientData.email, phone: clientData.phone, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), service: clientData.services?.length && clientData.services[0].service !== '' ? clientData.services[0].service : undefined, funnel: clientData.funnel, step: clientData.funnel?.step, page: pathname, eventId: newEventId })
-                                      fbq('track', 'Lead', { first_name: clientData.firstName, last_name: clientData.lastName, email: clientData.email, phone: clientData.phone && clientData.phone !== '' ? `56${clientData.phone}` : undefined, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), content_name: clientData.services?.length && clientData.services[0].service !== '' ? clientData.services[0].service : undefined, contents: { id: clientData.services?.length && clientData.services[0].service !== '' ? clientData.services[0].service : undefined, quantity: 1 }, event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
+                                        firstName: clientData.firstName,
+                                        lastName: clientData.lastName,
+                                        email: clientData.email,
+                                        phone: clientData.phone,
+                                        data: clientData.data,
+                                        form: clientData.forms![0].form,
+                                        fbc: Cookies.get('_fbc'),
+                                        fbp: Cookies.get('_fbp'),
+                                        page: pathname,
+                                        eventId: newEventId
+                                      })
+                                      fbq('track', 'Lead', {
+                                        first_name: clientData.firstName,
+                                        last_name: clientData.lastName,
+                                        email: clientData.email,
+                                        phone: clientData.phone && clientData.phone !== '' ? `56${clientData.phone}` : undefined,
+                                        fbp: Cookies.get('_fbp'),
+                                        fbc: Cookies.get('_fbc'),
+                                        content_name: clientData.services?.length && clientData.services[0].service !== '' ? clientData.services[0].service : undefined,
+                                        contents: { id: clientData.services?.length && clientData.services[0].service !== '' ? clientData.services[0].service : undefined, quantity: 1 },
+                                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                                      }, { eventID: newEventId })
                                       if (form?.action === 'Ir a una pagina') {
+                                        localStorage.setItem('popup', design.popup?.title!)
+                                        setPopup({ ...popup, view: 'flex', opacity: 'opacity-0' })
+                                        setTimeout(() => {
+                                          setPopup({ ...popup, view: 'hidden', opacity: 'opacity-0' })
+                                        }, 200);
                                         router.push(form.redirect!)
                                       } else if (form?.action === 'Mostrar mensaje') {
                                         setMessage(form.message!)
@@ -150,7 +194,7 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                                       setLoading(false)
                                     }
                                   }}>
-                                    <div className="flex flex-col gap-4 h-fit m-auto w-full p-6 md:p-8 max-w-[500px]">
+                                    <div className="flex flex-col gap-4 h-fit m-auto w-full p-6 md:p-8 max-w-[500px]" style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: '#111111', backgroundColor: '#ffffff' }}>
                                       {
                                         message !== ''
                                           ? <p className='text-lg text-center font-medium'>{message}</p>
@@ -161,9 +205,9 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                                                   ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
                                                   : ''
                                               }
-                                              <p className="text-xl font-medium text-center" style={style}>{forms?.find(form => form._id === content)?.title}</p>
+                                              <p className="text-xl font-medium text-center" style={style}>{forms?.find(form => form._id === design?.popup?.content)?.title}</p>
                                               {
-                                                forms?.find(form => form._id === content)?.informations.map(information => (
+                                                forms?.find(form => form._id === design?.popup?.content)?.informations.map(information => (
                                                   <div key={information.text} className="flex gap-2">
                                                     <div
                                                       className="my-auto"
@@ -181,7 +225,7 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                                                 ))
                                               }
                                               {
-                                                forms?.find(form => form._id === content)?.labels.map(label => (
+                                                forms?.find(form => form._id === design?.popup?.content)?.labels.map(label => (
                                                   <div key={label._id} className="flex flex-col gap-2">
                                                     <p>{label.text !== '' ? label.text : label.name}</p>
                                                     <Input
@@ -210,7 +254,7 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                                                   </div>
                                                 ))
                                               }
-                                              <Button type='submit' config='w-full' style={style} loading={loading}>{forms?.find(form => form._id === content)?.button}</Button>
+                                              <Button type='submit' config='w-full' style={style} loading={loading}>{forms?.find(form => form._id === design?.popup?.content)?.button}</Button>
                                             </>
                                           )
                                       }
@@ -227,11 +271,17 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
             )
             : calls.find(call => call._id === content)
               ? (
-                <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} transition-transform duration-200 max-w-[800px] bg-white border rounded-2xl m-auto w-full`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }}>
+                <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} transition-transform duration-200 max-w-[800px] bg-white m-auto w-full`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }}>
                   <div className="lg:flex">
                     <div className="p-6 md:p-8 border-b lg:border-b-0 lg:border-r flex flex-col gap-8 w-full lg:w-5/12">
                       <div className="flex flex-col gap-3">
-                        <p className="text-sm font-medium">CARMEN ORELLANA</p>
+                        {
+                          storeData?.logo && storeData.logo !== ''
+                            ? <Image src={storeData.logo} alt={`Imagen logo ${storeData.name}`} width={200} height={150} className='w-40' />
+                            : storeData?.logoWhite && storeData.logoWhite !== ''
+                              ? <Image src={storeData.logoWhite} alt={`Imagen logo ${storeData.name}`} width={200} height={150} className='w-40' />
+                              : ''
+                        }
                         {
                           calls.find(call => call._id === content)
                             ? (
@@ -247,7 +297,7 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
                         }
                       </div>
                       {
-                        calls.find(call => call._id === content)
+                        calls.find(call => call._id === content) && calls.find(call => call._id === content)?.description !== ''
                           ? (
                             <div className="flex flex-col gap-3">
                               <p className="font-medium">Descripción:</p>
@@ -269,7 +319,7 @@ export const PopupPage: React.FC<Props> = ({ popup, setPopup, content, design, c
               )
               : forms.find(form => form._id === content)
                 ? (
-                  <form ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} transition-transform duration-200 flex flex-col gap-4 border rounded-2xl h-fit m-auto p-6 md:p-8 w-full max-w-[600px] bg-white`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }} onSubmit={async (e: any) => {
+                  <form ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} transition-transform duration-200 flex flex-col gap-4 h-fit m-auto p-6 md:p-8 w-full max-w-[600px] bg-white`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }} onSubmit={async (e: any) => {
                     e.preventDefault()
                     if (!loading) {
                       setLoading(true)

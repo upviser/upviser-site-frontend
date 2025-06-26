@@ -166,7 +166,7 @@ export const Block3 = ({ content, index, calls, forms, design, payment, style, s
 
   return (
     <>
-      <PopupPage popup={popup} setPopup={setPopup} content={cont} design={design} calls={calls} forms={forms} payment={payment} style={style} />
+      <PopupPage popup={popup} setPopup={setPopup} content={cont} design={design} calls={calls} forms={forms} payment={payment} style={style} storeData={storeData} />
       <div key={content.content} className={`py-10 md:py-20 w-full flex px-4`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}` }}>
         <div className="text-center m-auto max-w-[1100px] w-full flex flex-col gap-8">
           {

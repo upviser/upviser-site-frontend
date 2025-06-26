@@ -3,10 +3,10 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button, H1, H2, P } from '../ui'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Design, ICall, IDesign, IForm, IPayment } from '@/interfaces'
+import { Design, ICall, IDesign, IForm, IPayment, IStoreData } from '@/interfaces'
 import { PopupPage } from './PopupPage'
 
-export const Block1 = ({ content, index, calls, forms, design, payment, style }: { content: IDesign, index: any, forms: IForm[], calls: ICall[], design: Design, payment: IPayment, style?: any }) => {
+export const Block1 = ({ content, index, calls, forms, design, payment, style, storeData }: { content: IDesign, index: any, forms: IForm[], calls: ICall[], design: Design, payment: IPayment, style?: any, storeData: IStoreData }) => {
 
   const [popup, setPopup] = useState({ view: 'hidden', opacity: 'opacity-0', mouse: false })
   const [cont, setCont] = useState('')
@@ -118,7 +118,7 @@ export const Block1 = ({ content, index, calls, forms, design, payment, style }:
 
   return (
     <>
-      <PopupPage popup={popup} setPopup={setPopup} content={cont} design={design} calls={calls} forms={forms} payment={payment} style={style} />
+      <PopupPage popup={popup} setPopup={setPopup} content={cont} design={design} calls={calls} forms={forms} payment={payment} style={style} storeData={storeData} />
       <div key={content.content} className={`py-10 md:py-20 w-full px-4 flex`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}` }}>
         <div className={`w-full flex max-w-[1280px] m-auto ${content.info?.image && content.info.image !== '' ? 'gap-8 lg:gap-16' : ''} flex-col text-center md:flex-row md:text-left`}>
           <div className="w-full m-auto flex flex-col gap-3 md:w-1/2">

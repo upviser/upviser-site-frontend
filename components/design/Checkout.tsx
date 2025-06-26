@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, H3, H4, Input, Spinner, Spinner2 } from '../ui'
 import { NumberFormat } from '@/utils';
 import { IClient, IDesign, IPayment, IService, IStoreData } from '@/interfaces';
-import { CardPayment, initMercadoPago, StatusScreen } from '@mercadopago/sdk-react'
+import { CardPayment, initMercadoPago, CardNumber, ExpirationDate, SecurityCode, createCardToken } from '@mercadopago/sdk-react'
 import axios from 'axios';
 import { io } from 'socket.io-client'
 import { usePathname } from 'next/navigation';
@@ -55,6 +55,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
   const [viewLogo2, setViewLogo2] = useState(false)
   const [viewInformation, setViewInformation] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [frequency, setFrequency] = useState('Mensual') 
 
   const refLogo = useRef(null)
   const refLogo2 = useRef(null)
@@ -62,10 +63,11 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
   const clientRef = useRef(client);
   const initializationRef = useRef(initialization)
   const paymentIdRef = useRef(null)
+  const serviceRef = useRef(services?.find(servi => servi._id === content.service?.service))
 
   const pathname = usePathname()
 
-  initMercadoPago(payment?.mercadoPago.publicKey!)
+  initMercadoPago(services?.find(servi => servi._id === content.service?.service)?.typePrice === 'Suscripción' ? payment?.suscription.publicKey! : payment?.mercadoPago.publicKey!)
 
   const viewCheckout = async () => {
     const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
@@ -326,6 +328,19 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
     }
   }
 
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const cardholderName = (document.getElementById('cardholderName') as HTMLInputElement).value;
+    const identificationType = (document.getElementById('identificationType') as HTMLInputElement).value;
+    const identificationNumber = (document.getElementById('identificationNumber') as HTMLInputElement).value;
+    const cardToken = await createCardToken({
+      cardholderName: cardholderName,
+      identificationType: identificationType,
+      identificationNumber: identificationNumber
+    })
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/suscribe`, { cardToken: cardToken?.id, price: initializationRef.current.amount, frequency: frequency })
+  }
+
   return (
     <div className={`py-10 md:py-20 w-full flex px-4`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}`, color: content.info.textColor }}>
       {
@@ -396,120 +411,138 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                           </div>
                           <div className='flex flex-col gap-4'>
                             <H3 text='Pago' config='font-medium' color={content.info.textColor} />
-                            <div className='flex flex-col gap-2 w-full'>
-                              {
-                                payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
-                                  ? (
-                                    <div className='w-full'>
-                                      <button className='flex gap-2 p-2 border w-full' onClick={async () => {
-                                        setPay('MercadoPago')
-                                        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mercado-pago-create`, [{ title: services?.find(service => service._id === content.service)?.name, unit_price: initializationRef.current.amount, quantity: 1 }])
-                                        setLink(res.data.init_point)
-                                      }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                                        <input type='radio' className='my-auto' checked={pay === 'MercadoPago'} />
-                                        <p>Tarjeta de Credito o Debito</p>
-                                      </button>
-                                      {
-                                        pay === 'MercadoPago'
-                                          ? (
-                                            <>
-                                              {cardPaymentMemo}
-                                              {
-                                                error !== ''
-                                                  ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
-                                                  : ''
-                                              }
-                                            </>
-                                          )
-                                          : ''
-                                      }
-                                    </div>
-                                  )
-                                  : ''
-                              }
-                              {
-                                payment.transbank.active && payment.transbank.apiKey && payment.transbank.apiKey !== '' && payment.transbank.commerceCode && payment.transbank.commerceCode !== ''
-                                  ? (
-                                    <div className='w-full'>
-                                      <button className='flex gap-2 p-2 border w-full' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} onClick={async () => {
-                                        setPay('WebPay Plus')
-                                        const pago = {
-                                          amount: initializationRef.current.amount,
-                                          returnUrl: `${process.env.NEXT_PUBLIC_WEB_URL}/procesando-pago`
-                                        }
-                                        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/create`, pago)
-                                        setToken(response.data.token)
-                                        setUrl(response.data.url)
-                                      }}>
-                                        <input type='radio' className='my-auto' checked={pay === 'WebPay Plus'} />
-                                        <p>WebPay Plus</p>
-                                      </button>
-                                      {
-                                        pay === 'WebPay Plus'
-                                          ? (
-                                            <form action={url} method="POST" id='formTransbank' className='mt-2'>
-                                              <input type="hidden" name="token_ws" value={token} />
-                                              <Button style={style} action={async (e: any) => {
-                                                e.preventDefault()
-                                                if (!transbankLoading) {
-                                                  setTransbankLoading(true)
-                                                  setError('')
-                                                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                                                  if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
-                                                    if (emailRegex.test(clientRef.current.email)) {
-                                                      let currentClient = clientRef.current
-                                                      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
-                                                      let client
-                                                      if (res.data.email) {
-                                                        currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago iniciado' : 'Pago iniciado'
-                                                        client = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-                                                        localStorage.setItem('service', JSON.stringify(currentClient.services![0]))
-                                                      } else {
-                                                        currentClient.services![0].payStatus = 'Pago iniciado'
-                                                        client = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, services: [{ ...currentClient.services![0], payStatus: 'Pago iniciado' }] })
-                                                        localStorage.setItem('service', JSON.stringify({ ...currentClient.services![0], payStatus: 'Pago iniciado' }))
-                                                      }
-                                                      const service = services?.find(service => service._id === content.service?.service)
-                                                      const price = Number(initializationRef.current.amount)
-                                                      const newEventId = new Date().getTime().toString()
-                                                      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: service?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: currentClient.services![0].payStatus, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'WebPay Plus' })
-                                                      fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-                                                      localStorage.setItem('pay', JSON.stringify(response.data))
-                                                      localStorage.setItem('service2', JSON.stringify(service))
-                                                      const form = document.getElementById('formTransbank') as HTMLFormElement
-                                                      if (form) {
-                                                        form.submit()
-                                                      }
+                            {
+                              service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción'
+                                ? (
+                                  <div className='flex flex-col gap-2 w-full'>
+                                    <form id="card-form" onSubmit={handleSubmit}>
+                                      <CardNumber placeholder="Número de tarjeta" />
+                                      <ExpirationDate placeholder="MM/AA" />
+                                      <SecurityCode placeholder="CVV" />
+                                      <input id="cardholderName" placeholder="Titular" />
+                                      <input id="identificationType" placeholder="Tipo documento" />
+                                      <input id="identificationNumber" placeholder="Número documento" />
+                                      <button type="submit">Suscribirme</button>
+                                    </form>
+                                  </div>
+                                )
+                                : (
+                                  <div className='flex flex-col gap-2 w-full'>
+                                    {
+                                      payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
+                                        ? (
+                                          <div className='w-full'>
+                                            <button className='flex gap-2 p-2 border w-full' onClick={async () => {
+                                              setPay('MercadoPago')
+                                              const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mercado-pago-create`, [{ title: services?.find(service => service._id === content.service)?.name, unit_price: initializationRef.current.amount, quantity: 1 }])
+                                              setLink(res.data.init_point)
+                                            }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                              <input type='radio' className='my-auto' checked={pay === 'MercadoPago'} />
+                                              <p>Tarjeta de Credito o Debito</p>
+                                            </button>
+                                            {
+                                              pay === 'MercadoPago'
+                                                ? (
+                                                  <>
+                                                    {cardPaymentMemo}
+                                                    {
+                                                      error !== ''
+                                                        ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                        : ''
                                                     }
-                                                  }
-                                                }
-                                              }} loading={transbankLoading} config='w-[350px]'>Pagar con WebPay Plus</Button>
-                                            </form>
-                                          )
-                                          : ''
-                                      }
-                                    </div>
-                                  )
-                                  : ''
-                              }
-                              {
-                                payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
-                                  ? (
-                                    <div className='w-full'>
-                                      <button className='flex gap-2 p-2 border w-full' onClick={() => setPay('MercadoPagoPro')} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                                        <input type='radio' className='my-auto' checked={pay === 'MercadoPagoPro'} />
-                                        <p>MercadoPago</p>
-                                      </button>
-                                      {
-                                        pay === 'MercadoPagoPro'
-                                          ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
-                                          : ''
-                                      }
-                                    </div>
-                                  )
-                                  : ''
-                              }
-                            </div>
+                                                  </>
+                                                )
+                                                : ''
+                                            }
+                                          </div>
+                                        )
+                                        : ''
+                                    }
+                                    {
+                                      payment.transbank.active && payment.transbank.apiKey && payment.transbank.apiKey !== '' && payment.transbank.commerceCode && payment.transbank.commerceCode !== ''
+                                        ? (
+                                          <div className='w-full'>
+                                            <button className='flex gap-2 p-2 border w-full' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} onClick={async () => {
+                                              setPay('WebPay Plus')
+                                              const pago = {
+                                                amount: initializationRef.current.amount,
+                                                returnUrl: `${process.env.NEXT_PUBLIC_WEB_URL}/procesando-pago`
+                                              }
+                                              const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/create`, pago)
+                                              setToken(response.data.token)
+                                              setUrl(response.data.url)
+                                            }}>
+                                              <input type='radio' className='my-auto' checked={pay === 'WebPay Plus'} />
+                                              <p>WebPay Plus</p>
+                                            </button>
+                                            {
+                                              pay === 'WebPay Plus'
+                                                ? (
+                                                  <form action={url} method="POST" id='formTransbank' className='mt-2'>
+                                                    <input type="hidden" name="token_ws" value={token} />
+                                                    <Button style={style} action={async (e: any) => {
+                                                      e.preventDefault()
+                                                      if (!transbankLoading) {
+                                                        setTransbankLoading(true)
+                                                        setError('')
+                                                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                                                        if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
+                                                          if (emailRegex.test(clientRef.current.email)) {
+                                                            let currentClient = clientRef.current
+                                                            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+                                                            let client
+                                                            if (res.data.email) {
+                                                              currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago iniciado' : 'Pago iniciado'
+                                                              client = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                                                              localStorage.setItem('service', JSON.stringify(currentClient.services![0]))
+                                                            } else {
+                                                              currentClient.services![0].payStatus = 'Pago iniciado'
+                                                              client = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, services: [{ ...currentClient.services![0], payStatus: 'Pago iniciado' }] })
+                                                              localStorage.setItem('service', JSON.stringify({ ...currentClient.services![0], payStatus: 'Pago iniciado' }))
+                                                            }
+                                                            const service = services?.find(service => service._id === content.service?.service)
+                                                            const price = Number(initializationRef.current.amount)
+                                                            const newEventId = new Date().getTime().toString()
+                                                            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: service?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: currentClient.services![0].payStatus, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'WebPay Plus' })
+                                                            fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                                                            localStorage.setItem('pay', JSON.stringify(response.data))
+                                                            localStorage.setItem('service2', JSON.stringify(service))
+                                                            const form = document.getElementById('formTransbank') as HTMLFormElement
+                                                            if (form) {
+                                                              form.submit()
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }} loading={transbankLoading} config='w-[350px]'>Pagar con WebPay Plus</Button>
+                                                  </form>
+                                                )
+                                                : ''
+                                            }
+                                          </div>
+                                        )
+                                        : ''
+                                    }
+                                    {
+                                      payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
+                                        ? (
+                                          <div className='w-full'>
+                                            <button className='flex gap-2 p-2 border w-full' onClick={() => setPay('MercadoPagoPro')} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                              <input type='radio' className='my-auto' checked={pay === 'MercadoPagoPro'} />
+                                              <p>MercadoPago</p>
+                                            </button>
+                                            {
+                                              pay === 'MercadoPagoPro'
+                                                ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
+                                                : ''
+                                            }
+                                          </div>
+                                        )
+                                        : ''
+                                    }
+                                  </div>
+                                )
+                            }
                           </div>
                         </div>
                         <div ref={refInformation} className={`${viewInformation ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 flex flex-col gap-4 sticky top-20 h-fit w-full p-6 md:p-8 md:w-2/5`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: content.info.textColor, backgroundColor: content.info.image }}>

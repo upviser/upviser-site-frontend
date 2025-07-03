@@ -582,7 +582,7 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
       </div>
       { children }
       </div>
-      <Footer storeData={storeData} politics={politics} design={design} />
+      <Footer storeData={storeData} politics={politics} design={design} products={products} />
     </div>
     </>
   )

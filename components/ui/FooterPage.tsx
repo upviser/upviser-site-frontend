@@ -1,10 +1,10 @@
 "use client"
-import { Design, IPolitics, IStoreData } from '@/interfaces'
+import { Design, IPolitics, IProduct, IStoreData } from '@/interfaces'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 
-export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreData, politics?: IPolitics, design: Design }) => {
+export const FooterPage = ({ storeData, politics, design, products }: { storeData: IStoreData, politics?: IPolitics, design: Design, products?: IProduct[] }) => {
   return (
     <div className='flex pl-4 pr-4 pt-14 pb-14 z-30' style={{ backgroundColor: design.footer?.bgColor && design.footer?.bgColor !== '' ? design.footer.bgColor : '#000000', color: design.footer?.textColor && design.footer?.textColor !== '' ? design.footer.textColor : '#ffffff' }}>
       <div className='w-[1280px] m-auto'>
@@ -54,7 +54,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
             <h3>PÁGINAS</h3>
             <div className='flex flex-col gap-1'>
               {
-                design.pages.filter(page => page.header).map(page => (
+                design.pages.filter(page => page.header && (page.page !== 'Tienda' || products?.length)).map(page => (
                   <Link key={page._id} href={page.slug === '' ? '/' : page.slug}>{ page.page }</Link>
                 ))
               }

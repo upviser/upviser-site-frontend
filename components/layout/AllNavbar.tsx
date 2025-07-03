@@ -371,15 +371,30 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
                 {
                   (politics?.privacy && politics.privacy !== '') || (politics?.terms && politics.terms !== '')
                     ? (
-                      <div className='flex gap-4'>
+                      <div className='flex gap-4 m-auto'>
                         {
-                          politics.privacy && politics.privacy !== ''
-                            ? <Link href='/politicas-de-privacidad'>Politicas de privacidad</Link>
+                          politics.terms && politics.terms !== ''
+                            ? <Link className='block text-sm mb-1' href='/terminos-y-condiciones'>Terminos y condiciones</Link>
                             : ''
                         }
                         {
                           politics.privacy && politics.privacy !== ''
-                            ? <Link href='/terminos-y-condiciones'>Terminos y condiciones</Link>
+                            ? <Link className='block text-sm mb-1' href='/politica-de-privacidad'>Política de privacidad</Link>
+                            : ''
+                        }
+                        {
+                          politics.devoltions && politics.devoltions !== ''
+                            ? <Link className='block text-sm mb-1' href='/politica-de-devoluciones'>Política de devoluciones</Link>
+                            : ''
+                        }
+                        {
+                          politics.shipping && politics.shipping !== ''
+                            ? <Link className='block text-sm mb-1' href='/politica-de-envios'>Política de envíos</Link>
+                            : ''
+                        }
+                        {
+                          politics.pay && politics.pay !== ''
+                            ? <Link className='block text-sm mb-1' href='/politica-de-pagos'>Política de pagos</Link>
                             : ''
                         }
                       </div>
@@ -391,7 +406,6 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
                     ? <p className='text-sm text-center m-auto' style={{ color: `${design.footer.textColor}80` }}>{design.footer.funnelText}</p>
                     : ''
                 }
-                <p className='m-auto text-center' style={{ color: design.footer?.textColor && design.footer.textColor !== '' ? design.footer.textColor : '#ffffff' }}>{storeData?.name} © 2024. Todos los derechos reservados.</p>
               </div>
             </div>
           )

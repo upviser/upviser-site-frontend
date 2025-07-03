@@ -329,8 +329,8 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
 
   const mercadoSubmit = async (e: any) => {
     e.preventDefault()
-    if (!transbankLoading) {
-      setTransbankLoading(true)
+    if (!submitLoading) {
+      setSubmitLoading(true)
       setError('')
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       let valid = true;
@@ -348,7 +348,7 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
       }
       if (!valid) {
         setError(errorMessage)
-        setLoading(false)
+        setSubmitLoading(false)
         return
       }
       let currentClient = clientRef.current
@@ -718,7 +718,7 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
                                     </button>
                                     {
                                       pay === 'MercadoPagoPro'
-                                        ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
+                                        ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2' width='250'>Pagar con MercadoPago</Button>
                                         : ''
                                     }
                                   </div>

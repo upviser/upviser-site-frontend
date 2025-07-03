@@ -486,7 +486,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                     <Input placeholder="Documento de identidad" inputChange={(e: any) => setIdentificationNumber(e.target.value)} value={identificationNumber} style={style} />
                                                   </div>
                                                 </div>
-                                                <Button type="submit" style={style}>Suscribirme</Button>
+                                                <Button type="submit" style={style} width='150'>Suscribirme</Button>
                                               </form>
                                             </>
                                           )
@@ -575,7 +575,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                                       }
                                                                     }
                                                                   }
-                                                                }} loading={transbankLoading} config='w-[350px]'>Pagar con WebPay Plus</Button>
+                                                                }} loading={transbankLoading} width='250'>Pagar con WebPay Plus</Button>
                                                               </form>
                                                             )
                                                             : ''
@@ -594,7 +594,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                         </button>
                                                         {
                                                           pay === 'MercadoPagoPro'
-                                                            ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
+                                                            ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2' width='250'>Pagar con MercadoPago</Button>
                                                             : ''
                                                         }
                                                       </div>

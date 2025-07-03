@@ -514,7 +514,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                         <Input placeholder="Documento de identidad" inputChange={(e: any) => setIdentificationNumber(e.target.value)} value={identificationNumber} style={style} />
                                       </div>
                                     </div>
-                                    <Button type="submit" style={style}>Suscribirme</Button>
+                                    <Button type="submit" style={style} width='150'>Suscribirme</Button>
                                   </form>
                                 )
                                 : (
@@ -605,7 +605,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                                           }
                                                         }
                                                       }
-                                                    }} loading={transbankLoading} config='w-[350px]'>Pagar con WebPay Plus</Button>
+                                                    }} loading={transbankLoading} width='250'>Pagar con WebPay Plus</Button>
                                                   </form>
                                                 )
                                                 : ''
@@ -624,7 +624,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                             </button>
                                             {
                                               pay === 'MercadoPagoPro'
-                                                ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
+                                                ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2' width='250'>Pagar con MercadoPago</Button>
                                                 : ''
                                             }
                                           </div>

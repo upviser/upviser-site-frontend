@@ -3,7 +3,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { City, ICartProduct, ISell, Region } from '../../interfaces'
 import { Select } from '../ui'
-import { calcularPaquete } from '@/utils'
+import { calcularPaquete, offer } from '@/utils'
 
 interface Props {
   setShipping: any
@@ -12,9 +12,13 @@ interface Props {
   chilexpress: any
   style: any
   sellRef: any
+  dest?: any
+  setDest?: any
+  streets?: any
+  setStreets?: any
 }
 
-export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpress, style, sellRef }) => {
+export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpress, style, sellRef, dest, setDest, streets, setStreets }) => {
 
   const [regions, setRegions] = useState<Region[]>()
   const [citys, setCitys] = useState<City[]>()
@@ -62,8 +66,8 @@ export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpr
               "length": dimentions.length
           },
           "productType": 3,
-          "contentType": 1,
-          "declaredWorth": "10000",
+          "contentType": 5,
+          "declaredWorth": sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0),
           "deliveryTime": 0
         }, {
           headers: {
@@ -75,6 +79,27 @@ export const Shipping: React.FC<Props> = ({ setShipping, sell, setSell, chilexpr
         setShipping(request.data.data.courierServiceOptions)
         setSell({ ...sell, city: e.target.value })
         sellRef.current = { ...sell, city: e.target.value }
+        const res = await axios.post('http://testservices.wschilexpress.com/georeference/api/v1.0/streets/search', {
+          "countyName": city?.countyName,
+          "streetName": sell.address,
+          "pointsOfInterestEnabled": true,
+          "streetNameEnabled": true,
+          "roadType": 0
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Ocp-Apim-Subscription-Key': chile.coberturaKey
+          }
+        })
+        if (res.data.streets.length) {
+          if (res.data.streets.length === 1) {
+            setDest({ ...dest, streetName: res.data.streets[0].streetName, countyCoverageCode: city?.countyCode })
+          } else {
+            setDest({ ...dest, countyCoverageCode: city?.countyCode })
+            setStreets(res.data.streets)
+          }
+        }
       }
 
   return (

@@ -4,13 +4,13 @@ import Head from 'next/head'
 import Link from 'next/link'
 import React, { useState, useEffect, useContext } from 'react'
 import { ProductList, ShippingCart } from '../../components/products'
-import { Design, IProduct } from '../../interfaces'
+import { Design, IProduct, IStoreData } from '../../interfaces'
 import { NumberFormat, offer } from '../../utils'
 import Image from 'next/image'
 import { Button, H1, LinkButton } from '../ui'
 import { Quantity } from '.'
 
-const CartPage = ({ design, products, style }: { design: Design, products: IProduct[], style: any }) => {
+const CartPage = ({ design, products, style, storeData }: { design: Design, products: IProduct[], style: any, storeData?: IStoreData }) => {
 
   const {cart} = useContext(CartContext)
 
@@ -86,7 +86,7 @@ const CartPage = ({ design, products, style }: { design: Design, products: IProd
                     <div className='p-6 450:p-6 dark:bg-neutral-800 dark:border-neutral-700' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', backgroundColor: design.cartPage.detailsColor }}>
                       <div className='mb-2 pb-2 border-b dark:border-neutral-700'>
                         <div className='mb-4 border-b pb-4 dark:border-neutral-700'>
-                          <ShippingCart setShippingCost={setShippingCost} style={style} />
+                          <ShippingCart setShippingCost={setShippingCost} style={style} storeData={storeData} />
                         </div>
                         <div className='flex gap-2 justify-between mb-1'>
                           <span className='text-[14px] dark:text-neutral-400'>Subtotal</span>

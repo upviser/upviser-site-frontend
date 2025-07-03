@@ -181,8 +181,8 @@ export default async function CategoryPage({ params }: { params: { category: str
                   </div>
                 </div>
                 {
-                  category.image
-                    ? <Image className={`absolute -z-10 w-full object-cover h-64 xl:h-80 2xl:h-96`} src={category.image} alt='Banner categoria' width={1920} height={1080} />
+                  category.banner
+                    ? <Image className={`absolute -z-10 w-full object-cover h-64 xl:h-80 2xl:h-96`} src={category.banner} alt='Banner categoria' width={1920} height={1080} />
                     : ''
                 }
               </div>

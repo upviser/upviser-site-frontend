@@ -1,6 +1,6 @@
 "use client"
-import { ICartProduct, IPayment, IProduct, ISell, IVariation } from '@/interfaces'
-import { offer } from '@/utils'
+import { ICartProduct, IPayment, IProduct, ISell, IStoreData, IVariation } from '@/interfaces'
+import { calcularPaquete, offer } from '@/utils'
 import axios from 'axios'
 import Link from 'next/link'
 import router from 'next/router'
@@ -17,7 +17,7 @@ const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/`, {
 
 declare const fbq: Function
 
-export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, payment, sellRef, initializationRef, saveDataRef, setPaymentCompleted, setPaymentFailed }: { sell: ISell, clientId: string, saveData: any, token: string, link: string, url: string, style: any, payment: IPayment, sellRef: any, initializationRef: any, saveDataRef: any, setPaymentCompleted: any, setPaymentFailed: any }) => {
+export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, payment, sellRef, initializationRef, saveDataRef, setPaymentCompleted, setPaymentFailed, dest, storeData, serviceTypeCode, serviceTypeCodeRef, destRef }: { sell: ISell, clientId: string, saveData: any, token: string, link: string, url: string, style: any, payment: IPayment, sellRef: any, initializationRef: any, saveDataRef: any, setPaymentCompleted: any, setPaymentFailed: any, dest?: any, storeData?: IStoreData, serviceTypeCode?: number, serviceTypeCodeRef?: any, destRef?: any }) => {
 
     const [submitLoading, setSubmitLoading] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -34,52 +34,107 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
         e.preventDefault()
         if (!submitLoading) {
           setSubmitLoading(true)
-          const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, sell)
-          if (clientId !== '') {
-            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/clients/${clientId}`, sell)
-          }
-          localStorage.setItem('sell', JSON.stringify(data))
-          sell.cart.map(async (product: ICartProduct) => {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.slug}`)
-            let prod: IProduct = res.data
-            if (product.variation?.variation) {
-              if (product.variation.subVariation) {
-                if (product.variation.subVariation2) {
-                  const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation && variation.subVariation2 === product.variation.subVariation2)
-                  prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
-                  await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+          if (sellRef.current.email !== '' && sellRef.current.firstName !== '' && sellRef.current.lastName !== '' && sellRef.current.phone !== '' && sellRef.current.address !== '' && sellRef.current.number !== '' && sellRef.current.region !== '' && sellRef.current.city !== '') {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)
+            const dimentions = calcularPaquete(sell.cart)
+            const shippingData = {
+              "header": {
+                  "customerCardNumber": res.data.cardNumber ? res.data.cardNumber : "18578680",
+                  "countyOfOriginCoverageCode": storeData?.locations?.length ? storeData?.locations[0].countyCoverageCode : '',
+                  "labelType": 2
+              },
+              "details": [{
+                  "addresses": [{
+                      "countyCoverageCode": dest.countyCoverageCode,
+                      "streetName": dest.streetName,
+                      "streetNumber": sell.number,
+                      "supplement": sell.details,
+                      "addressType": "DEST",
+                      "deliveryOnCommercialOffice": false
+                  }, {
+                      "addressId": 0,
+                      "countyCoverageCode": storeData?.locations?.length ? storeData?.locations[0].countyCoverageCode : '',
+                      "streetName": storeData?.locations?.length ? storeData?.locations[0].streetName : '',
+                      "streetNumber": storeData?.locations?.length ? storeData?.locations[0].streetNumber : '',
+                      "supplement": storeData?.locations?.length ? storeData?.locations[0].details : '',
+                      "addressType": "DEV",
+                      "deliveryOnCommercialOffice": false
+                  }],
+                  "contacts": [{
+                      "name": storeData?.nameContact,
+                      "phoneNumber": storeData?.phone,
+                      "mail": storeData?.email,
+                      "contactType": "R"
+                  }, {
+                      "name": `${sell.firstName} ${sell.lastName}`,
+                      "phoneNumber": sell.phone,
+                      "mail": sell.email,
+                      "contactType": "D"
+                  }],
+                  "packages": [{
+                      "weight": dimentions.weight,
+                      "height": dimentions.height,
+                      "width": dimentions.width,
+                      "length": dimentions.length,
+                      "serviceDeliveryCode": serviceTypeCode,
+                      "productCode": "3",
+                      "deliveryReference": "TEST-EOC-17",
+                      "groupReference": "GRUPO",
+                      "declaredValue": sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0),
+                      "declaredContent": "5"
+                  }]
+              }]
+            }
+            localStorage.setItem('shippingData', JSON.stringify(shippingData))
+            const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, sell)
+            if (clientId !== '') {
+              await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/clients/${clientId}`, sell)
+            }
+            localStorage.setItem('sell', JSON.stringify(data))
+            sell.cart.map(async (product: ICartProduct) => {
+              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.slug}`)
+              let prod: IProduct = res.data
+              if (product.variation?.variation) {
+                if (product.variation.subVariation) {
+                  if (product.variation.subVariation2) {
+                    const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation && variation.subVariation2 === product.variation.subVariation2)
+                    prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
+                    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+                  } else {
+                    const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation)
+                    prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
+                    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+                  }
                 } else {
-                  const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation)
+                  const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation)
                   prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
                   await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
                 }
               } else {
-                const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation)
-                prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity })
               }
-            } else {
-              await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity })
+            })
+            if (saveData) {
+              Cookies.set('firstName', sell.firstName)
+              Cookies.set('lastName', sell.lastName)
+              Cookies.set('email', sell.email)
+              if (sell.phone) {
+                Cookies.set('phone', sell.phone.toString())
+              }
+              Cookies.set('address', sell.address)
+              if (sell.details) {
+                Cookies.set('details', sell.details)
+              }
+              Cookies.set('city', sell.city)
+              Cookies.set('region', sell.region)
             }
-          })
-          if (saveData) {
-            Cookies.set('firstName', sell.firstName)
-            Cookies.set('lastName', sell.lastName)
-            Cookies.set('email', sell.email)
-            if (sell.phone) {
-              Cookies.set('phone', sell.phone.toString())
+            fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+            const form = document.getElementById('formTransbank') as HTMLFormElement
+            if (form) {
+              form.submit()
             }
-            Cookies.set('address', sell.address)
-            if (sell.details) {
-              Cookies.set('details', sell.details)
-            }
-            Cookies.set('city', sell.city)
-            Cookies.set('region', sell.region)
-          }
-          fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
-          const form = document.getElementById('formTransbank') as HTMLFormElement
-          if (form) {
-            form.submit()
+          } else {
+            setError('Debes completar todos los datos')
           }
         }
       }
@@ -139,50 +194,105 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
         e.preventDefault()
         if (!submitLoading) {
           setSubmitLoading(true)
-          const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, sell)
-          if (clientId !== '') {
-            await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/clients/${clientId}`, sell)
-          }
-          localStorage.setItem('sell', JSON.stringify(data))
-          sell.cart.map(async (product) => {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.slug}`)
-            let prod: IProduct = res.data
-            if (product.variation?.variation) {
-              if (product.variation.subVariation) {
-                if (product.variation.subVariation2) {
-                  const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation && variation.subVariation2 === product.variation.subVariation2)
-                  prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
-                  await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+          if (sellRef.current.email !== '' && sellRef.current.firstName !== '' && sellRef.current.lastName !== '' && sellRef.current.phone !== '' && sellRef.current.address !== '' && sellRef.current.number !== '' && sellRef.current.region !== '' && sellRef.current.city !== '') {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)
+            const dimentions = calcularPaquete(sell.cart)
+            const shippingData = {
+              "header": {
+                  "customerCardNumber": res.data.cardNumber ? res.data.cardNumber : "18578680",
+                  "countyOfOriginCoverageCode": storeData?.locations?.length ? storeData?.locations[0].countyCoverageCode : '',
+                  "labelType": 2
+              },
+              "details": [{
+                  "addresses": [{
+                      "countyCoverageCode": dest.countyCoverageCode,
+                      "streetName": dest.streetName,
+                      "streetNumber": sell.number,
+                      "supplement": sell.details,
+                      "addressType": "DEST",
+                      "deliveryOnCommercialOffice": false
+                  }, {
+                      "addressId": 0,
+                      "countyCoverageCode": storeData?.locations?.length ? storeData?.locations[0].countyCoverageCode : '',
+                      "streetName": storeData?.locations?.length ? storeData?.locations[0].streetName : '',
+                      "streetNumber": storeData?.locations?.length ? storeData?.locations[0].streetNumber : '',
+                      "supplement": storeData?.locations?.length ? storeData?.locations[0].details : '',
+                      "addressType": "DEV",
+                      "deliveryOnCommercialOffice": false
+                  }],
+                  "contacts": [{
+                      "name": storeData?.nameContact,
+                      "phoneNumber": storeData?.phone,
+                      "mail": storeData?.email,
+                      "contactType": "R"
+                  }, {
+                      "name": `${sell.firstName} ${sell.lastName}`,
+                      "phoneNumber": sell.phone,
+                      "mail": sell.email,
+                      "contactType": "D"
+                  }],
+                  "packages": [{
+                      "weight": dimentions.weight,
+                      "height": dimentions.height,
+                      "width": dimentions.width,
+                      "length": dimentions.length,
+                      "serviceDeliveryCode": serviceTypeCode,
+                      "productCode": "3",
+                      "deliveryReference": "TEST-EOC-17",
+                      "groupReference": "GRUPO",
+                      "declaredValue": sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0),
+                      "declaredContent": "5"
+                  }]
+              }]
+            }
+            localStorage.setItem('shippingData', JSON.stringify(shippingData))
+            const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, sell)
+            if (clientId !== '') {
+              await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/clients/${clientId}`, sell)
+            }
+            localStorage.setItem('sell', JSON.stringify(data))
+            sell.cart.map(async (product) => {
+              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.slug}`)
+              let prod: IProduct = res.data
+              if (product.variation?.variation) {
+                if (product.variation.subVariation) {
+                  if (product.variation.subVariation2) {
+                    const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation && variation.subVariation2 === product.variation.subVariation2)
+                    prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
+                    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+                  } else {
+                    const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation)
+                    prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
+                    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+                  }
                 } else {
-                  const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation && variation.subVariation === product.variation.subVariation)
+                  const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation)
                   prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
                   await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
                 }
               } else {
-                const variationIndex = prod.variations!.variations.findIndex((variation: IVariation) => variation.variation === product.variation?.variation)
-                prod.variations!.variations[variationIndex].stock = prod.variations!.variations[variationIndex].stock - product.quantity!
-                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity, variations: prod.variations })
+                await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity })
               }
-            } else {
-              await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/products/${product._id}`, { stock: prod.stock - product.quantity })
+            })
+            if (saveData) {
+              Cookies.set('firstName', sell.firstName)
+              Cookies.set('lastName', sell.lastName)
+              Cookies.set('email', sell.email)
+              if (sell.phone) {
+                Cookies.set('phone', sell.phone.toString())
+              }
+              Cookies.set('address', sell.address)
+              if (sell.details) {
+                Cookies.set('details', sell.details)
+              }
+              Cookies.set('city', sell.city)
+              Cookies.set('region', sell.region)
             }
-          })
-          if (saveData) {
-            Cookies.set('firstName', sell.firstName)
-            Cookies.set('lastName', sell.lastName)
-            Cookies.set('email', sell.email)
-            if (sell.phone) {
-              Cookies.set('phone', sell.phone.toString())
-            }
-            Cookies.set('address', sell.address)
-            if (sell.details) {
-              Cookies.set('details', sell.details)
-            }
-            Cookies.set('city', sell.city)
-            Cookies.set('region', sell.region)
+            fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+            window.location.href = link
+          } else {
+            setError('Debes completar todos los datos')
           }
-          fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
-          window.location.href = link
         }
       }
 
@@ -192,7 +302,7 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
         setLoading(true)
         setError('')
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (sellRef.current.email !== '' && sellRef.current.firstName !== '' && sellRef.current.lastName !== '' && sellRef.current.phone !== '') {
+        if (sellRef.current.email !== '' && sellRef.current.firstName !== '' && sellRef.current.lastName !== '' && sellRef.current.phone !== '' && sellRef.current.address !== '' && sellRef.current.number !== '' && sellRef.current.region !== '' && sellRef.current.city !== '') {
           if (emailRegex.test(sellRef.current.email)) {
             return new Promise<void>((resolve, reject) => {
               fetch(`${process.env.NEXT_PUBLIC_API_URL}/process_payment`, {
@@ -207,6 +317,57 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
                   console.log(response)
                   paymentIdRef.current = response.id
                   let currentSell = sellRef.current
+                  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)
+                  const dimentions = calcularPaquete(sell.cart)
+                  const shippingData = {
+                    "header": {
+                        "customerCardNumber": res.data.cardNumber ? res.data.cardNumber : "18578680",
+                        "countyOfOriginCoverageCode": storeData?.locations?.length ? storeData?.locations[0].countyCoverageCode : '',
+                        "labelType": 2
+                    },
+                    "details": [{
+                        "addresses": [{
+                            "countyCoverageCode": destRef.countyCoverageCode,
+                            "streetName": destRef.streetName,
+                            "streetNumber": sellRef.current.number,
+                            "supplement": sellRef.current.details,
+                            "addressType": "DEST",
+                            "deliveryOnCommercialOffice": false
+                        }, {
+                            "addressId": 0,
+                            "countyCoverageCode": storeData?.locations?.length ? storeData?.locations[0].countyCoverageCode : '',
+                            "streetName": storeData?.locations?.length ? storeData?.locations[0].streetName : '',
+                            "streetNumber": storeData?.locations?.length ? storeData?.locations[0].streetNumber : '',
+                            "supplement": storeData?.locations?.length ? storeData?.locations[0].details : '',
+                            "addressType": "DEV",
+                            "deliveryOnCommercialOffice": false
+                        }],
+                        "contacts": [{
+                            "name": storeData?.nameContact,
+                            "phoneNumber": storeData?.phone,
+                            "mail": storeData?.email,
+                            "contactType": "R"
+                        }, {
+                            "name": `${sellRef.current.firstName} ${sellRef.current.lastName}`,
+                            "phoneNumber": sellRef.current.phone,
+                            "mail": sellRef.current.email,
+                            "contactType": "D"
+                        }],
+                        "packages": [{
+                            "weight": dimentions.weight,
+                            "height": dimentions.height,
+                            "width": dimentions.width,
+                            "length": dimentions.length,
+                            "serviceDeliveryCode": serviceTypeCodeRef.current,
+                            "productCode": "3",
+                            "deliveryReference": "TEST-EOC-17",
+                            "groupReference": "GRUPO",
+                            "declaredValue": sellRef.current.cart.reduce((bef: any, curr: any) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0),
+                            "declaredContent": "5"
+                        }]
+                    }]
+                  }
+                  localStorage.setItem('shippingData', JSON.stringify(shippingData))
                   const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, { ...sellRef.current, state: 'Pago realizado' })
                   await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentSell, tags: sellRef.current.subscription ? ['Clientes', 'Suscriptores'] : ['Clientes'] })
                   localStorage.setItem('sell', JSON.stringify(data))
@@ -300,13 +461,13 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
           ? (
             <>
               {cardPaymentMemo}
-              {
-                error !== ''
-                  ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
-                  : ''
-              }
             </>
           )
+          : ''
+      }
+      {
+        error !== ''
+          ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
           : ''
       }
       <div className='flex gap-2 justify-between mt-auto mb-auto'>

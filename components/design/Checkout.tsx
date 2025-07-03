@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Button, H3, H4, Input, Spinner, Spinner2 } from '../ui'
+import { Button, H3, H4, Input, Select, Spinner, Spinner2 } from '../ui'
 import { NumberFormat } from '@/utils';
 import { IClient, IDesign, IPayment, IService, IStoreData } from '@/interfaces';
 import { CardPayment, initMercadoPago, CardNumber, ExpirationDate, SecurityCode, createCardToken } from '@mercadopago/sdk-react'
@@ -34,6 +34,10 @@ declare global {
 
 declare const fbq: Function
 
+const MemoCardNumber = React.memo(CardNumber);
+const MemoExpirationDate = React.memo(ExpirationDate);
+const MemoSecurityCode = React.memo(SecurityCode);
+
 export const Checkout: React.FC<Props> = ({ content, services, step, payment, storeData, style, index }) => {
 
   const [client, setClient] = useState<IClient>({ email: '' })
@@ -55,7 +59,11 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
   const [viewLogo2, setViewLogo2] = useState(false)
   const [viewInformation, setViewInformation] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
-  const [frequency, setFrequency] = useState('Mensual') 
+  const [frequency, setFrequency] = useState('Mensual')
+  const [cardholderName, setCardholderName] = useState('')
+  const [identificationType, setIdentificationType] = useState('')
+  const [identificationNumber, setIdentificationNumber] = useState('')
+  const [loadingSuscribe, setLoadingSuscribe] = useState(false)
 
   const refLogo = useRef(null)
   const refLogo2 = useRef(null)
@@ -330,21 +338,56 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const cardholderName = (document.getElementById('cardholderName') as HTMLInputElement).value;
-    const identificationType = (document.getElementById('identificationType') as HTMLInputElement).value;
-    const identificationNumber = (document.getElementById('identificationNumber') as HTMLInputElement).value;
-    const cardToken = await createCardToken({
-      cardholderName: cardholderName,
-      identificationType: identificationType,
-      identificationNumber: identificationNumber
-    })
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/suscribe`, { cardToken: cardToken?.id, price: initializationRef.current.amount, frequency: frequency })
+    if (!loadingSuscribe) {
+      setLoadingSuscribe(true)
+      setError('')
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
+        if (emailRegex.test(clientRef.current.email)) {
+          const cardToken = await createCardToken({
+            cardholderName: cardholderName,
+            identificationType: identificationType,
+            identificationNumber: identificationNumber
+          })
+          console.log(cardToken)
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/suscribe`, { cardToken: cardToken?.id, price: initializationRef.current.amount, frequency: frequency, email: client.email })
+          console.log(res.data)
+          if (res.data.status === 'Processed') {
+            let currentClient = clientRef.current
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+            const service = services?.find(service => service._id === content.service?.service)
+            if (res.data.email) {
+              currentClient.services![0].payStatus = 'Pago realizado'
+              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, services: [{ ...currentClient.services![0], step: service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id }], tags: ['clientes'] })
+            } else {
+              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, services: [{ ...currentClient.services![0], step: service?.steps[0]._id, payStatus: 'Pago realizado' }], tags: ['clientes'] })
+            }
+            const price = Number(initializationRef.current.amount)
+            const newEventId = new Date().getTime().toString()
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'MercadoPago' })
+            fbq('track', 'Purchase', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+            socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+            setLoading(false)
+            setPaymentCompleted(true)
+          } else {
+            let currentClient = clientRef.current
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+            if (res.data.email) {
+              currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago no realizado' : 'Pago no realizado'
+              await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+            }
+            setPaymentFailed(true)
+          }
+        }
+      }
+    }
   }
 
   return (
     <div className={`py-10 md:py-20 w-full flex px-4`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}`, color: content.info.textColor }}>
       {
-        payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== ''
+        ((service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') && (payment?.suscription.active && payment.suscription.accessToken !== '' && payment.suscription.publicKey !== '')) || ((payment?.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '') || (payment?.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''))
           ? (
             <div className='m-auto w-full max-w-[1280px] gap-6 flex flex-col'>
               { 
@@ -375,6 +418,28 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                         <div className='flex flex-col gap-6 w-full md:w-3/5'>
                           <div className='flex flex-col gap-4'>
                             <H3 text='Datos de contacto' config='font-medium' color={content.info.textColor} />
+                            {
+                              service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción'
+                                ? (
+                                  <div className='flex flex-col gap-2'>
+                                    <p style={{ color: content.info.textColor }}>Plan</p>
+                                    <Select selectChange={(e: any) => {
+                                      setFrequency(e.target.value)
+                                      if (e.target.value === 'Mensual') {
+                                        setInitialization({ amount: service.typePay === 'Hay que agregarle el IVA al precio' ? Number(service.price) / 100 * 119 : Number(service.price) })
+                                        initializationRef.current = { amount: Number(service.anualPrice) }
+                                      } else {
+                                        setInitialization({ amount: service.typePay === 'Hay que agregarle el IVA al precio' ? Number(service.anualPrice) / 100 * 119 : Number(service.anualPrice) })
+                                        initializationRef.current = { amount: Number(service.anualPrice) }
+                                      }
+                                    }} value={frequency} style={style}>
+                                      <option>Mensual</option>
+                                      <option>Anual</option>
+                                    </Select>
+                                  </div>
+                                )
+                                : ''
+                            }
                             <div className='flex flex-col gap-2'>
                               <p style={{ color: content.info.textColor }}>Email</p>
                               <Input placeholder='Email' inputChange={(e: any) => {
@@ -414,17 +479,43 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                             {
                               service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción'
                                 ? (
-                                  <div className='flex flex-col gap-2 w-full'>
-                                    <form id="card-form" onSubmit={handleSubmit}>
-                                      <CardNumber placeholder="Número de tarjeta" />
-                                      <ExpirationDate placeholder="MM/AA" />
-                                      <SecurityCode placeholder="CVV" />
-                                      <input id="cardholderName" placeholder="Titular" />
-                                      <input id="identificationType" placeholder="Tipo documento" />
-                                      <input id="identificationNumber" placeholder="Número documento" />
-                                      <button type="submit">Suscribirme</button>
-                                    </form>
-                                  </div>
+                                  <form id="card-form" onSubmit={handleSubmit} className='flex flex-col gap-4 w-full'>
+                                    <div className='flex flex-col gap-2'>
+                                      <p>Nombre en la tarjeta</p>
+                                      <Input inputChange={(e: any) => setCardholderName(e.target.value)} value={cardholderName} placeholder={'Nombre en la tarjeta'} style={style} />
+                                    </div>
+                                    <div className='flex flex-col gap-2'>
+                                      <p>Numero de la tarjeta</p>
+                                      <div className='border py-2 px-3 w-full text-sm transition-all duration-200 h-10 flex' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
+                                        <MemoCardNumber placeholder="Número de tarjeta" />
+                                      </div>
+                                    </div>
+                                    <div className='flex gap-2'>
+                                      <div className='w-1/2 flex flex-col gap-2'>
+                                        <p>Fecha de expiración</p>
+                                        <div className='border py-2 px-3 w-full text-sm transition-all duration-200 h-10 flex' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
+                                          <MemoExpirationDate placeholder="MM/AA" />
+                                        </div>
+                                      </div>
+                                      <div className='w-1/2 flex flex-col gap-2'>
+                                        <p>CVV</p>
+                                        <div className='border py-2 px-3 w-full text-sm transition-all duration-200 h-10 flex' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
+                                          <MemoSecurityCode placeholder="CVV" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className='flex flex-col gap-2'>
+                                      <p>Documento de identidad</p>
+                                      <div className='flex gap-2'>
+                                        <Select selectChange={(e: any) => setIdentificationType(e.target.value)} value={identificationType} style={style}>
+                                          <option>RUT</option>
+                                          <option>Otro</option>
+                                        </Select>
+                                        <Input placeholder="Documento de identidad" inputChange={(e: any) => setIdentificationNumber(e.target.value)} value={identificationNumber} style={style} />
+                                      </div>
+                                    </div>
+                                    <Button type="submit" style={style}>Suscribirme</Button>
+                                  </form>
                                 )
                                 : (
                                   <div className='flex flex-col gap-2 w-full'>

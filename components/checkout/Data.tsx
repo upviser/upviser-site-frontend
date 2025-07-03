@@ -17,9 +17,13 @@ interface Props {
     style: any
     design: any
     sellRef: any
+    dest?: any
+    setDest?: any
+    streets?: any
+    setStreets?: any
 }
 
-export const Data: React.FC<Props> = ({ status, sell, setContactView, setContactOpacity, setShippingView, setShippingOpacity, inputChange, setSell, setShipping, chilexpress, style, design, sellRef }) => {
+export const Data: React.FC<Props> = ({ status, sell, setContactView, setContactOpacity, setShippingView, setShippingOpacity, inputChange, setSell, setShipping, chilexpress, style, design, sellRef, dest, setDest, streets, setStreets }) => {
   return (
     <>
       {
@@ -94,10 +98,36 @@ export const Data: React.FC<Props> = ({ status, sell, setContactView, setContact
                   <Input inputChange={inputChange} value={sell.address} type={'text'} placeholder={'Dirección'} name='address' text='text-sm' style={style} />
                 </div>
                 <div className='flex flex-col gap-2'>
+                  <p className='text-sm'>Numero</p>
+                  <Input inputChange={inputChange} value={sell.number} type={'text'} placeholder={'Numero'} name='number' text='text-sm' style={style} />
+                </div>
+                <div className='flex flex-col gap-2'>
                   <p className='text-sm'>Detalles (Opcional)</p>
                   <Input inputChange={inputChange} value={sell.details!} type={'text'} placeholder={'Detalles'} name='details' text='text-sm' style={style} />
                 </div>
-                <Shipping setShipping={setShipping} sell={sell} setSell={setSell} chilexpress={chilexpress} style={style} sellRef={sellRef} />
+                <Shipping setShipping={setShipping} sell={sell} setSell={setSell} chilexpress={chilexpress} style={style} sellRef={sellRef} dest={dest} setDest={setDest} streets={streets} setStreets={setStreets} />
+                {
+                  streets.length
+                    ? (
+                      <div className='flex flex-col gap-2'>
+                        <p className='text-sm'>Se han detectado más de una calle con el nombre que ingresaste</p>
+                        <div className='flex gap-2 flex-wrap'>
+                          {
+                            streets.map((street: any) => (
+                              <button key={street.streetName} className='flex gap-2 p-2 border dark:border-neutral-700' onClick={(e: any) => {
+                                e.preventDefault()
+                                setDest({ ...dest, streetName: street.streetName })
+                              }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                <input type='radio' checked={street.streetName === dest.streetName} />
+                                <p className='text-sm'>{street.streetName}</p>
+                              </button>
+                            ))
+                          }
+                        </div>
+                      </div>
+                    )
+                    : ''
+                }
                 <div className='flex flex-col gap-2'>
                   <p className='text-sm'>Teléfono</p>
                   <div className='flex gap-2'>

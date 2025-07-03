@@ -68,8 +68,8 @@ export const ShippingPrice: React.FC<Props> = ({ style, tempCartProduct }) => {
               "length": dimentions.length
           },
           "productType": 3,
-          "contentType": 1,
-          "declaredWorth": "2333",
+          "contentType": 5,
+          "declaredWorth": tempCartProduct.price,
           "deliveryTime": 0
         }, {
           headers: {

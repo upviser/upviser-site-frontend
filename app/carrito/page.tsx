@@ -17,6 +17,11 @@ async function fetchStyle () {
   return res.json()
 }
 
+async function fetchStoreData () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/store-data`)
+  return res.json()
+}
+
 export default async function Page () {
 
   const products = await fetchProducts()
@@ -25,7 +30,9 @@ export default async function Page () {
 
   const style = await fetchStyle()
 
+  const storeData = await fetchStoreData()
+
   return (
-    <CartPage design={design} products={products} style={style} />
+    <CartPage design={design} products={products} style={style} storeData={storeData} />
   )
 }

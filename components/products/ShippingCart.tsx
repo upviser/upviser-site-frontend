@@ -1,17 +1,18 @@
 "use client"
 import axios from 'axios'
 import React, { useContext, useEffect, useState } from 'react'
-import { City, Region, IShipping } from '../../interfaces'
-import { calcularPaquete, FreeShipping, NumberFormat } from '../../utils'
+import { City, Region, IShipping, IStoreData } from '../../interfaces'
+import { calcularPaquete, FreeShipping, NumberFormat, offer } from '../../utils'
 import { H2, Select } from '../ui'
 import CartContext from '@/context/cart/CartContext'
 
 interface Props {
   setShippingCost: any
   style: any
+  storeData?: IStoreData
 }
 
-export const ShippingCart: React.FC<Props> = ({ setShippingCost, style }) => {
+export const ShippingCart: React.FC<Props> = ({ setShippingCost, style, storeData }) => {
 
   const [regions, setRegions] = useState<Region[]>()
   const [citys, setCitys] = useState<City[]>()
@@ -57,7 +58,7 @@ export const ShippingCart: React.FC<Props> = ({ setShippingCost, style }) => {
       dimentions = { weight: '1', height: '10', width: '10', length: '2' }
     }
     const request = await axios.post('https://testservices.wschilexpress.com/rating/api/v1.0/rates/courier', {
-      "originCountyCode": "QNOR",
+      "originCountyCode": storeData?.locations![0].countyCoverageCode,
       "destinationCountyCode": city?.countyCode,
       "package": {
         "weight": dimentions.weight,
@@ -66,8 +67,8 @@ export const ShippingCart: React.FC<Props> = ({ setShippingCost, style }) => {
         "length": dimentions.length
       },
       "productType": 3,
-      "contentType": 1,
-      "declaredWorth": "2333",
+      "contentType": 5,
+      "declaredWorth": cart?.reduce((bef, curr) => curr.quantityOffers ? bef + offer(curr) : bef + curr.price * curr.quantity, 0),
       "deliveryTime": 0
     }, {
       headers: {

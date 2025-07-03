@@ -36,8 +36,12 @@ export const EditShipping: React.FC<Props> = ({ shippingMouse, setShippingOpacit
             <Input placeholder='Dirección' name='address' inputChange={inputChange} value={sell.address} style={style} />
           </div>
           <div className='flex flex-col gap-2'>
-            <p className='text-sm'>Deptartamento</p>
-            <Input placeholder='Departamento (Opcional)' name='details' inputChange={inputChange} value={sell.details} style={style} />
+            <p className='text-sm'>Número</p>
+            <Input placeholder='Número' name='number' inputChange={inputChange} value={sell.number} style={style} />
+          </div>
+          <div className='flex flex-col gap-2'>
+            <p className='text-sm'>Detalles</p>
+            <Input placeholder='Detalles (Opcional)' name='details' inputChange={inputChange} value={sell.details} style={style} />
           </div>
           <Shipping setShipping={setShipping} sell={sell} setSell={setSell} sellRef={sellRef} chilexpress={chilexpress} style={style} />
           <Button action={(e: any) => {

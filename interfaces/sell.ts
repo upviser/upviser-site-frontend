@@ -7,6 +7,7 @@ export interface ISell {
   email: string
   phone?: number
   address: string
+  number: string
   details?: string
   region: string
   city: string

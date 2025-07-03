@@ -12,11 +12,16 @@ interface Props {
     style?: any
     sellRef: any
     initializationRef: any
+    setServiceTypeCode?: any
+    serviceTypeCodeRef?: any
 }
 
-export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef }) => {
+export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef, setServiceTypeCode, serviceTypeCodeRef }) => {
 
     const shippingChange = (e: any) => {
+        const ship = shipping?.find(ship => ship.serviceValue === e.target.value)
+        setServiceTypeCode(ship?.serviceTypeCode)
+        serviceTypeCodeRef.current = ship?.serviceTypeCode
         setSell({ ...sell, shippingMethod: e.target.className, shipping: e.target.value, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(e.target.value) })
         sellRef.current = { ...sell, shippingMethod: e.target.className, shipping: e.target.value, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(e.target.value) }
         initializationRef.current = { amount: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(e.target.value) }

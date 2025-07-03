@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation"
 import axios from "axios"
 import { calcularPaquete, offer, verificarStockCarrito } from "@/utils"
 import { ButtonPay, Data, EditData, EditShipping, Resume, ResumePhone, ShippingPay } from "."
-import { H1 } from "../ui"
 
 declare const fbq: Function
 
@@ -29,6 +28,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
     lastName: Cookies.get('lastName') || '',
     email: Cookies.get('email') || '',
     address: Cookies.get('address') || '',
+    number: Cookies.get('number') || '',
     region: Cookies.get('region') || '',
     city: Cookies.get('city') || '',
     cart: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('cart')!) : [],
@@ -57,10 +57,15 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   const [url, setUrl] = useState('')
   const [paymentCompleted, setPaymentCompleted] = useState(false)
   const [paymentFailed, setPaymentFailed] = useState(false)
+  const [dest, setDest] = useState({ countyCoverageCode: '', streetName: '', serviceDeliveryCode: '' })
+  const [streets, setStreets] = useState([])
+  const [serviceTypeCode, setServiceTypeCode] = useState()
 
   const sellRef = useRef(sell)
   const initializationRef = useRef({ amount: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) })
   const saveDataRef = useRef(false)
+  const destRef = useRef({ countyCoverageCode: '', streetName: '', serviceDeliveryCode: '' })
+  const serviceTypeCodeRef = useRef()
 
   const { data: session, status } = useSession()
 
@@ -70,6 +75,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
 
   const getClientData = async () => {
     if (status === 'authenticated') {
+      const resp = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${user.email}`)
       const data: IClient = response.data
       if (data) {
@@ -81,7 +87,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
         const res = await axios.get('https://testservices.wschilexpress.com/georeference/api/v1.0/regions', {
           headers: {
             'Cache-Control': 'no-cache',
-            'Ocp-Apim-Subscription-Key': '4ebbe4e737b54bfe94307bca9e36ac4d'
+            'Ocp-Apim-Subscription-Key': resp.data.coberturaKey
           }
         })
         const regions = res.data.regions
@@ -89,14 +95,14 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
         const response = await axios.get(`https://testservices.wschilexpress.com/georeference/api/v1.0/coverage-areas?RegionCode=${region?.regionId}&type=0`, {
           headers: {
             'Cache-Control': 'no-cache',
-            'Ocp-Apim-Subscription-Key': '4ebbe4e737b54bfe94307bca9e36ac4d'
+            'Ocp-Apim-Subscription-Key': resp.data.coberturaKey
           }
         })
         const citys = response.data.coverageAreas
         const city = citys?.find((city: any) => city.countyName === data.city)
         const dimentions = calcularPaquete(cart!)
         const request = await axios.post('https://testservices.wschilexpress.com/rating/api/v1.0/rates/courier', {
-          "originCountyCode": "QNOR",
+          "originCountyCode": storeData.locations![0].countyCoverageCode,
           "destinationCountyCode": city?.countyCode,
           "package": {
               "weight": dimentions.weight,
@@ -105,17 +111,38 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
               "length": dimentions.length
           },
           "productType": 3,
-          "contentType": 1,
-          "declaredWorth": "10000",
+          "contentType": 5,
+          "declaredWorth": sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0),
           "deliveryTime": 0
         }, {
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
-            'Ocp-Apim-Subscription-Key': '512b6b0ff709426d82968a33be83b4a1'
+            'Ocp-Apim-Subscription-Key': resp.data.cotizadorKey
           }
         })
         setShipping(request.data.data.courierServiceOptions)
+        const respo = await axios.post('http://testservices.wschilexpress.com/georeference/api/v1.0/streets/search', {
+          "countyName": city?.countyName,
+          "streetName": sell.address,
+          "pointsOfInterestEnabled": true,
+          "streetNameEnabled": true,
+          "roadType": 0
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Ocp-Apim-Subscription-Key': resp.data.coberturaKey
+          }
+        })
+        if (respo.data.streets.length) {
+          if (respo.data.streets.length === 1) {
+            setDest({ ...dest, streetName: respo.data.streets[0].streetName, countyCoverageCode: city?.countyCode })
+          } else {
+            setDest({ ...dest, countyCoverageCode: city?.countyCode })
+            setStreets(respo.data.streets)
+          }
+        }
       }
     }
     if (typeof window !== 'undefined') {
@@ -176,7 +203,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   return (
     <>
       {
-        (chilexpress.active && chilexpress.coberturaKey !== '' && chilexpress.cotizadorKey !== '') && ((payment.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '') || (payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''))
+        ((chilexpress.active && chilexpress.coberturaKey !== '' && chilexpress.cotizadorKey !== '' && chilexpress.enviosKey !== '' && chilexpress.cardNumber !== '') && ((payment.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '') || (payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''))) && storeData.locations?.length && storeData.locations[0].countyCoverageCode !== '' && storeData.locations[0].streetName !== '' && storeData.locations[0].streetNumber !== '' && storeData.nameContact !== ''
           ? (
             <div style={{ backgroundColor: design.checkoutPage.bgColor, color: design.checkoutPage.textColor }}>
               <EditData contactMouse={contactMouse} setContactOpacity={setContactOpacity} setContactView={setContactView} contactView={contactView} contactOpacity={contactOpacity} setContactMouse={setContactMouse} inputChange={inputChange} sell={sell} style={style} />
@@ -204,8 +231,8 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
                           : (
                             <>
                               <h1 className="font-medium text-2xl sm:text-4xl">Finalizar compra</h1>
-                              <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} />
-                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} />
+                              <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} dest={dest} setDest={setDest} streets={streets} setStreets={setStreets} />
+                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} setServiceTypeCode={setServiceTypeCode} serviceTypeCodeRef={serviceTypeCodeRef} />
                               {
                                 status === 'authenticated'
                                   ? ''
@@ -224,7 +251,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
                                     </div>
                                   )
                               }
-                              <ButtonPay sell={sell} clientId={clientId} saveData={saveData} token={token} link={link} url={url} style={style} payment={payment} sellRef={sellRef} initializationRef={initializationRef} saveDataRef={saveDataRef} setPaymentCompleted={setPaymentCompleted} setPaymentFailed={setPaymentFailed} />
+                              <ButtonPay sell={sell} clientId={clientId} saveData={saveData} token={token} link={link} url={url} style={style} payment={payment} sellRef={sellRef} initializationRef={initializationRef} saveDataRef={saveDataRef} setPaymentCompleted={setPaymentCompleted} setPaymentFailed={setPaymentFailed} dest={dest} storeData={storeData} serviceTypeCode={serviceTypeCode} serviceTypeCodeRef={serviceTypeCodeRef} destRef={destRef} />
                             </>
                           )
                     }

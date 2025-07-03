@@ -27,7 +27,7 @@ export const FooterPage = ({ storeData, politics, design }: { storeData: IStoreD
             }
             {
               storeData?.locations?.length
-                ? storeData.locations.map(location => (
+                ? storeData.locations.filter(location => location.commercial).map(location => (
                   <Link key={location.address} className='text-sm' href={location?.mapsLink && location?.mapsLink !== '' ? location?.mapsLink : ''} target='_blank'>{location?.address}, {location.city}, {location.region}</Link>
                 ))
                 : ''

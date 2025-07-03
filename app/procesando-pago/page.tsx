@@ -52,7 +52,16 @@ export default function PayProcess () {
       } else if (sell) {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/commit`, { token: tokenWs })
         if (response.data.status === 'AUTHORIZED') {
-          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago realizado', sell: sell })
+          const shippingData = JSON.parse(localStorage.getItem('shippingData')!)
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)
+          const request = await axios.post('http://testservices.wschilexpress.com/transport-orders/api/v1.0/transport-orders', shippingData, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              'Ocp-Apim-Subscription-Key': res.data.enviosKey
+            }
+          })
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago realizado', shippingLabel: request.data.data.detail[0].label.labelData })
           router.push('/gracias-por-comprar')
         } else if (response.data.status === 'FAILED') {
           await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })
@@ -96,7 +105,16 @@ export default function PayProcess () {
         }
       } else if (sell) {
         if (status === 'approved') {
-          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago realizado', sell: sell })
+          const shippingData = JSON.parse(localStorage.getItem('shippingData')!)
+          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)
+          const request = await axios.post('http://testservices.wschilexpress.com/transport-orders/api/v1.0/transport-orders', shippingData, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              'Ocp-Apim-Subscription-Key': res.data.enviosKey
+            }
+          })
+          await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago realizado', shippingLabel: request.data.data.detail[0].label.labelData })
           router.push('/gracias-por-comprar')
         } else {
           await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })

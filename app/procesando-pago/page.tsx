@@ -31,6 +31,8 @@ export default function PayProcess () {
                 ? 'Segundo pago realizado'
                 : '';
             await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: [service] })
+          } else if (localStorage.getItem('meetingData')) {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/meeting`, JSON.parse(localStorage.getItem('meetingData')!))
           }
           router.push('/gracias-por-comprar')
         } else if (response.data.status === 'FAILED') {
@@ -47,6 +49,10 @@ export default function PayProcess () {
               : '';
             await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: serviceToUpdate })
           }
+          localStorage.setItem('pay', '')
+          localStorage.setItem('service', '')
+          localStorage.setItem('service2', '')
+          localStorage.setItem('meetingData', '')
           router.push('/pago-fallido')
         }
       } else if (sell) {
@@ -65,6 +71,9 @@ export default function PayProcess () {
           router.push('/gracias-por-comprar')
         } else if (response.data.status === 'FAILED') {
           await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })
+          localStorage.setItem('sell', '')
+          localStorage.setItem('cart', '')
+          localStorage.setItem('shippingData', '')
           router.push('/pago-fallido')
         }
       }
@@ -85,6 +94,8 @@ export default function PayProcess () {
                 ? 'Segundo pago realizado'
                 : '';
             await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: [service] })
+          } else if (localStorage.getItem('meetingData')) {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/meeting`, JSON.parse(localStorage.getItem('meetingData')!))
           }
           router.push('/gracias-por-comprar')
         } else {
@@ -101,6 +112,10 @@ export default function PayProcess () {
                 : '';
             await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: serviceToUpdate })
           }
+          localStorage.setItem('pay', '')
+          localStorage.setItem('service', '')
+          localStorage.setItem('service2', '')
+          localStorage.setItem('meetingData', '')
           router.push('/pago-fallido')
         }
       } else if (sell) {
@@ -118,6 +133,9 @@ export default function PayProcess () {
           router.push('/gracias-por-comprar')
         } else {
           await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })
+          localStorage.setItem('sell', '')
+          localStorage.setItem('cart', '')
+          localStorage.setItem('shippingData', '')
           router.push('/pago-fallido')
         }
       }
@@ -136,9 +154,16 @@ export default function PayProcess () {
             ? 'Segundo pago no realizado'
             : '';
         await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: serviceToUpdate })
+        localStorage.setItem('pay', '')
+        localStorage.setItem('service', '')
+        localStorage.setItem('service2', '')
+        localStorage.setItem('meetingData', '')
         router.push('/pago-fallido')
       } else if (sell) {
         await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })
+        localStorage.setItem('sell', '')
+        localStorage.setItem('cart', '')
+        localStorage.setItem('shippingData', '')
         router.push('/pago-fallido')
       }
     }

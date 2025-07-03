@@ -333,33 +333,47 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
       setTransbankLoading(true)
       setError('')
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
-        if (emailRegex.test(clientRef.current.email)) {
-          let currentClient = clientRef.current
-          currentClient.services![0].payStatus = 'Pago iniciado'
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-          const price = Number(initializationRef.current.amount)
-          let res: any
-          if (pathname !== '/' && !pathname.includes('/llamadas/')) {
-            res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
-          }
-          let respo
-          let stepFind
-          if (res?.data) {
-            respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
-            stepFind = respo.data?.steps?.find((ste: any) => `/${ste.slug}` === pathname)
-          }
-          const newEventId = new Date().getTime().toString()
-          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, price: price, state: 'Pago iniciado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'WebPay Plus' })
-          fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: call?._id, currency: "clp", value: price, contents: { id: call?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-          localStorage.setItem('pay', JSON.stringify(response.data))
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/meeting`, { ...newClient, date: selectedDateTime, tags: tags, meeting: meeting, call: call.nameMeeting, duration: call.duration === '15 minutos' ? 15 : call.duration === '20 minutos' ? 20 : call.duration === '25 minutos' ? 25 : call.duration === '30 minutos' ? 30 : call.duration === '40 minutos' ? 40 : call.duration === '45 minutos' ? 45 : call.duration === '50 minutos' ? 50 : call.duration === '60 minutos' ? 60 : call.duration === '70 minutos' ? 70 : call.duration === '80 minutos' ? 80 : call.duration === '90 minutos' ? 90 : call.duration === '100 minutos' ? 100 : call.duration === '110 minutos' ? 110 : call.duration === '120 minutos' ? 120 : 120, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), page: pathname, service: newClient.services?.length && newClient.services[0].service && newClient.services[0].service !== '' ? newClient.services[0].service : undefined, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, funnel: respo?.data?._id, step: stepFind?._id, eventId: newEventId, type: call.type?.length && call.type.length >= 2 ? type : call.type![0], calendar: call.calendar })
-          fbq('track', 'Schedule', { first_name: newClient.firstName, last_name: newClient.lastName, email: newClient.email, phone: newClient.phone && newClient.phone !== '' ? `56${newClient.phone}` : undefined, content_name: call._id, currency: "clp", value: call.price, contents: { id: call._id, item_price: call.price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-          socket.emit('newNotification', { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/llamadas', view: false })
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/reuniones', view: false })
-          window.location.href = link
+      let valid = true;
+      let errorMessage = ''
+      call.labels?.forEach((label) => {
+        const value = label.data === 'phone' ? newClient[label.data] : newClient.data?.find(dat => dat.name === label.data)?.value || newClient[label.data]
+        if (label.data && (!value || value.trim() === '')) {
+          valid = false;
+          errorMessage = `Por favor, completa el campo ${label.text}.`;
         }
+      })
+      if (newClient.email && !emailRegex.test(newClient.email)) {
+        valid = false
+        errorMessage = 'Has ingresado un correo inválido'
       }
+      if (!valid) {
+        setError(errorMessage)
+        setLoading(false)
+        return
+      }
+      let currentClient = clientRef.current
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+      const price = Number(initializationRef.current.amount)
+      let res: any
+      if (pathname !== '/' && !pathname.includes('/llamadas/')) {
+        res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
+      }
+      let respo
+      let stepFind
+      if (res?.data) {
+        respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
+        stepFind = respo.data?.steps?.find((ste: any) => `/${ste.slug}` === pathname)
+      }
+      const newEventId = new Date().getTime().toString()
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, price: price, state: 'Pago iniciado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'WebPay Plus' })
+      fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: call?._id, currency: "clp", value: price, contents: { id: call?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+      localStorage.setItem('pay', JSON.stringify(response.data))
+      const meetingData = { ...newClient, date: selectedDateTime, tags: tags, meeting: meeting, call: call.nameMeeting, duration: call.duration === '15 minutos' ? 15 : call.duration === '20 minutos' ? 20 : call.duration === '25 minutos' ? 25 : call.duration === '30 minutos' ? 30 : call.duration === '40 minutos' ? 40 : call.duration === '45 minutos' ? 45 : call.duration === '50 minutos' ? 50 : call.duration === '60 minutos' ? 60 : call.duration === '70 minutos' ? 70 : call.duration === '80 minutos' ? 80 : call.duration === '90 minutos' ? 90 : call.duration === '100 minutos' ? 100 : call.duration === '110 minutos' ? 110 : call.duration === '120 minutos' ? 120 : 120, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), page: pathname, service: newClient.services?.length && newClient.services[0].service && newClient.services[0].service !== '' ? newClient.services[0].service : undefined, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, funnel: respo?.data?._id, step: stepFind?._id, eventId: newEventId, type: call.type?.length && call.type.length >= 2 ? type : call.type![0], calendar: call.calendar, price: call.price }
+      localStorage.setItem('meetingData', JSON.stringify(meetingData))
+      fbq('track', 'Schedule', { first_name: newClient.firstName, last_name: newClient.lastName, email: newClient.email, phone: newClient.phone && newClient.phone !== '' ? `56${newClient.phone}` : undefined, content_name: call._id, currency: "clp", value: call.price, contents: { id: call._id, item_price: call.price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+      socket.emit('newNotification', { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/llamadas', view: false })
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/reuniones', view: false })
+      window.location.href = link
     }
   }
 
@@ -574,127 +588,144 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
                   {
                     call.price && call.price !== ''
                       ? (
-                        <div className='flex flex-col gap-2 w-full'>
-                          {
-                            payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
-                              ? (
-                                <div className='w-full'>
-                                  <button className='flex gap-2 p-2 border w-full' onClick={async (e: any) => {
-                                    e.preventDefault()
-                                    setPay('MercadoPago')
-                                    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mercado-pago-create`, [{ title: services?.find(service => service._id === content.service)?.name, unit_price: initializationRef.current.amount, quantity: 1 }])
-                                    setLink(res.data.init_point)
-                                  }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                                    <input type='radio' className='my-auto' checked={pay === 'MercadoPago'} />
-                                    <p>Tarjeta de Credito o Debito</p>
-                                  </button>
-                                  {
-                                    pay === 'MercadoPago'
-                                      ? (
-                                        <>
-                                          {cardPaymentMemo}
-                                          {
-                                            error !== ''
-                                              ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
-                                              : ''
-                                          }
-                                        </>
-                                      )
-                                      : ''
-                                  }
-                                </div>
-                              )
-                              : ''
-                          }
-                          {
-                            payment.transbank.active && payment.transbank.apiKey && payment.transbank.apiKey !== '' && payment.transbank.commerceCode && payment.transbank.commerceCode !== ''
-                              ? (
-                                <div className='w-full'>
-                                  <button className='flex gap-2 p-2 border w-full' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} onClick={async (e: any) => {
-                                    e.preventDefault()
-                                    setPay('WebPay Plus')
-                                    const pago = {
-                                      amount: initializationRef.current.amount,
-                                      returnUrl: `${process.env.NEXT_PUBLIC_WEB_URL}/procesando-pago`
+                        <div className='flex flex-col gap-4 w-full'>
+                          <p className='text-lg font-semibold'>Pago</p>
+                          <div className='flex flex-col gap-4 w-full'>
+                            {
+                              payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
+                                ? (
+                                  <div className='w-full'>
+                                    <button className='flex gap-2 p-2 border w-full' onClick={async (e: any) => {
+                                      e.preventDefault()
+                                      setPay('MercadoPago')
+                                      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/mercado-pago-create`, [{ title: services?.find(service => service._id === content.service)?.name, unit_price: initializationRef.current.amount, quantity: 1 }])
+                                      setLink(res.data.init_point)
+                                    }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                      <input type='radio' className='my-auto' checked={pay === 'MercadoPago'} />
+                                      <p>Tarjeta de Credito o Debito</p>
+                                    </button>
+                                    {
+                                      pay === 'MercadoPago'
+                                        ? (
+                                          <>
+                                            {cardPaymentMemo}
+                                            {
+                                              error !== ''
+                                                ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                : ''
+                                            }
+                                          </>
+                                        )
+                                        : ''
                                     }
-                                    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/create`, pago)
-                                    setToken(response.data.token)
-                                    setUrl(response.data.url)
-                                  }}>
-                                    <input type='radio' className='my-auto' checked={pay === 'WebPay Plus'} />
-                                    <p>WebPay Plus</p>
-                                  </button>
-                                  {
-                                    pay === 'WebPay Plus'
-                                      ? (
-                                        <form action={url} method="POST" id='formTransbank' className='mt-2'>
-                                          <input type="hidden" name="token_ws" value={token} />
-                                          <Button style={style} action={async (e: any) => {
-                                            e.preventDefault()
-                                            if (!transbankLoading) {
-                                              setTransbankLoading(true)
-                                              setError('')
-                                              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                                              if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
-                                                if (emailRegex.test(clientRef.current.email)) {
-                                                  let currentClient = clientRef.current
-                                                  currentClient.services![0].payStatus = 'Pago iniciado'
-                                                  await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-                                                  const price = Number(initializationRef.current.amount)
-                                                  let res: any
-                                                  if (pathname !== '/' && !pathname.includes('/llamadas/')) {
-                                                    res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
+                                  </div>
+                                )
+                                : ''
+                            }
+                            {
+                              payment.transbank.active && payment.transbank.apiKey && payment.transbank.apiKey !== '' && payment.transbank.commerceCode && payment.transbank.commerceCode !== ''
+                                ? (
+                                  <div className='w-full'>
+                                    <button className='flex gap-2 p-2 border w-full' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} onClick={async (e: any) => {
+                                      e.preventDefault()
+                                      setPay('WebPay Plus')
+                                      const pago = {
+                                        amount: initializationRef.current.amount,
+                                        returnUrl: `${process.env.NEXT_PUBLIC_WEB_URL}/procesando-pago`
+                                      }
+                                      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/create`, pago)
+                                      setToken(response.data.token)
+                                      setUrl(response.data.url)
+                                    }}>
+                                      <input type='radio' className='my-auto' checked={pay === 'WebPay Plus'} />
+                                      <p>WebPay Plus</p>
+                                    </button>
+                                    {
+                                      pay === 'WebPay Plus'
+                                        ? (
+                                          <form action={url} method="POST" id='formTransbank' className='mt-2'>
+                                            <input type="hidden" name="token_ws" value={token} />
+                                            <Button style={style} action={async (e: any) => {
+                                              e.preventDefault()
+                                              if (!transbankLoading) {
+                                                setTransbankLoading(true)
+                                                setError('')
+                                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                                                let valid = true;
+                                                let errorMessage = ''
+                                                call.labels?.forEach((label) => {
+                                                  const value = label.data === 'phone' ? newClient[label.data] : newClient.data?.find(dat => dat.name === label.data)?.value || newClient[label.data]
+                                                  if (label.data && (!value || value.trim() === '')) {
+                                                    valid = false;
+                                                    errorMessage = `Por favor, completa el campo ${label.text}.`;
                                                   }
-                                                  let respo
-                                                  let stepFind
-                                                  if (res?.data) {
-                                                    respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
-                                                    stepFind = respo.data?.steps?.find((ste: any) => `/${ste.slug}` === pathname)
-                                                  }
-                                                  const newEventId = new Date().getTime().toString()
-                                                  const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, price: price, state: 'Pago iniciado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'WebPay Plus' })
-                                                  fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: call?._id, currency: "clp", value: price, contents: { id: call?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-                                                  localStorage.setItem('pay', JSON.stringify(response.data))
-                                                  await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/meeting`, { ...newClient, date: selectedDateTime, tags: tags, meeting: meeting, call: call.nameMeeting, duration: call.duration === '15 minutos' ? 15 : call.duration === '20 minutos' ? 20 : call.duration === '25 minutos' ? 25 : call.duration === '30 minutos' ? 30 : call.duration === '40 minutos' ? 40 : call.duration === '45 minutos' ? 45 : call.duration === '50 minutos' ? 50 : call.duration === '60 minutos' ? 60 : call.duration === '70 minutos' ? 70 : call.duration === '80 minutos' ? 80 : call.duration === '90 minutos' ? 90 : call.duration === '100 minutos' ? 100 : call.duration === '110 minutos' ? 110 : call.duration === '120 minutos' ? 120 : 120, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), page: pathname, service: newClient.services?.length && newClient.services[0].service && newClient.services[0].service !== '' ? newClient.services[0].service : undefined, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, funnel: respo?.data?._id, step: stepFind?._id, eventId: newEventId, type: call.type?.length && call.type.length >= 2 ? type : call.type![0], calendar: call.calendar })
-                                                  fbq('track', 'Schedule', { first_name: newClient.firstName, last_name: newClient.lastName, email: newClient.email, phone: newClient.phone && newClient.phone !== '' ? `56${newClient.phone}` : undefined, content_name: call._id, currency: "clp", value: call.price, contents: { id: call._id, item_price: call.price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-                                                  socket.emit('newNotification', { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/llamadas', view: false })
-                                                  await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/reuniones', view: false })
-                                                  const form = document.getElementById('formTransbank') as HTMLFormElement
-                                                  if (form) {
-                                                    form.submit()
-                                                  }
+                                                })
+                                                if (newClient.email && !emailRegex.test(newClient.email)) {
+                                                  valid = false
+                                                  errorMessage = 'Has ingresado un correo inválido'
+                                                }
+                                                if (!valid) {
+                                                  setError(errorMessage)
+                                                  setLoading(false)
+                                                  return
+                                                }
+                                                let currentClient = clientRef.current
+                                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                                                const price = Number(initializationRef.current.amount)
+                                                let res: any
+                                                if (pathname !== '/' && !pathname.includes('/llamadas/')) {
+                                                  res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
+                                                }
+                                                let respo
+                                                let stepFind
+                                                if (res?.data) {
+                                                  respo = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-name/${res.data}`)
+                                                  stepFind = respo.data?.steps?.find((ste: any) => `/${ste.slug}` === pathname)
+                                                }
+                                                const newEventId = new Date().getTime().toString()
+                                                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, price: price, state: 'Pago iniciado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined, method: 'WebPay Plus' })
+                                                fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: call?._id, currency: "clp", value: price, contents: { id: call?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                                                localStorage.setItem('pay', JSON.stringify(response.data))
+                                                const meetingData = { ...newClient, date: selectedDateTime, tags: tags, meeting: meeting, call: call.nameMeeting, duration: call.duration === '15 minutos' ? 15 : call.duration === '20 minutos' ? 20 : call.duration === '25 minutos' ? 25 : call.duration === '30 minutos' ? 30 : call.duration === '40 minutos' ? 40 : call.duration === '45 minutos' ? 45 : call.duration === '50 minutos' ? 50 : call.duration === '60 minutos' ? 60 : call.duration === '70 minutos' ? 70 : call.duration === '80 minutos' ? 80 : call.duration === '90 minutos' ? 90 : call.duration === '100 minutos' ? 100 : call.duration === '110 minutos' ? 110 : call.duration === '120 minutos' ? 120 : 120, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), page: pathname, service: newClient.services?.length && newClient.services[0].service && newClient.services[0].service !== '' ? newClient.services[0].service : undefined, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, funnel: respo?.data?._id, step: stepFind?._id, eventId: newEventId, type: call.type?.length && call.type.length >= 2 ? type : call.type![0], calendar: call.calendar, price: call.price }
+                                                localStorage.setItem('meetingData', JSON.stringify(meetingData))
+                                                fbq('track', 'Schedule', { first_name: newClient.firstName, last_name: newClient.lastName, email: newClient.email, phone: newClient.phone && newClient.phone !== '' ? `56${newClient.phone}` : undefined, content_name: call._id, currency: "clp", value: call.price, contents: { id: call._id, item_price: call.price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                                                socket.emit('newNotification', { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/llamadas', view: false })
+                                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nueva reunion agendada:', description: call.nameMeeting, url: '/reuniones', view: false })
+                                                const form = document.getElementById('formTransbank') as HTMLFormElement
+                                                if (form) {
+                                                  form.submit()
                                                 }
                                               }
-                                            }
-                                          }} loading={transbankLoading} config='w-[350px]'>Pagar con WebPay Plus</Button>
-                                        </form>
-                                      )
-                                      : ''
-                                  }
-                                </div>
-                              )
-                              : ''
-                          }
-                          {
-                            payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
-                              ? (
-                                <div className='w-full'>
-                                  <button className='flex gap-2 p-2 border w-full' onClick={(e: any) => {
-                                    e.preventDefault()
-                                    setPay('MercadoPagoPro')
-                                  }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                                    <input type='radio' className='my-auto' checked={pay === 'MercadoPagoPro'} />
-                                    <p>MercadoPago</p>
-                                  </button>
-                                  {
-                                    pay === 'MercadoPagoPro'
-                                      ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
-                                      : ''
-                                  }
-                                </div>
-                              )
-                              : ''
-                          }
+                                            }} loading={transbankLoading} width='250'>Pagar con WebPay Plus</Button>
+                                          </form>
+                                        )
+                                        : ''
+                                    }
+                                  </div>
+                                )
+                                : ''
+                            }
+                            {
+                              payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
+                                ? (
+                                  <div className='w-full'>
+                                    <button className='flex gap-2 p-2 border w-full' onClick={(e: any) => {
+                                      e.preventDefault()
+                                      setPay('MercadoPagoPro')
+                                    }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                                      <input type='radio' className='my-auto' checked={pay === 'MercadoPagoPro'} />
+                                      <p>MercadoPago</p>
+                                    </button>
+                                    {
+                                      pay === 'MercadoPagoPro'
+                                        ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2'>Pagar con MercadoPago</Button>
+                                        : ''
+                                    }
+                                  </div>
+                                )
+                                : ''
+                            }
+                          </div>
                         </div>
                       )
                       : <Button type='submit' loading={loading} config='w-full' style={style}>{call.buttonText && call.buttonText !== '' ? call.buttonText : 'Agendar llamada'}</Button>

@@ -514,6 +514,11 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                         <Input placeholder="Documento de identidad" inputChange={(e: any) => setIdentificationNumber(e.target.value)} value={identificationNumber} style={style} />
                                       </div>
                                     </div>
+                                    {
+                                      error !== ''
+                                        ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                        : ''
+                                    }
                                     <Button type="submit" style={style} width='150'>Suscribirme</Button>
                                   </form>
                                 )
@@ -569,7 +574,12 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                             {
                                               pay === 'WebPay Plus'
                                                 ? (
-                                                  <form action={url} method="POST" id='formTransbank' className='mt-2'>
+                                                  <form action={url} method="POST" id='formTransbank' className='mt-2 flex flex-col gap-2'>
+                                                    {
+                                                      error !== ''
+                                                        ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                        : ''
+                                                    }
                                                     <input type="hidden" name="token_ws" value={token} />
                                                     <Button style={style} action={async (e: any) => {
                                                       e.preventDefault()
@@ -622,6 +632,11 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                               <input type='radio' className='my-auto' checked={pay === 'MercadoPagoPro'} />
                                               <p>MercadoPago</p>
                                             </button>
+                                            {
+                                              error !== ''
+                                                ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                : ''
+                                            }
                                             {
                                               pay === 'MercadoPagoPro'
                                                 ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2' width='250'>Pagar con MercadoPago</Button>

@@ -486,6 +486,11 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                     <Input placeholder="Documento de identidad" inputChange={(e: any) => setIdentificationNumber(e.target.value)} value={identificationNumber} style={style} />
                                                   </div>
                                                 </div>
+                                                {
+                                                  error !== ''
+                                                    ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                    : ''
+                                                }
                                                 <Button type="submit" style={style} width='150'>Suscribirme</Button>
                                               </form>
                                             </>
@@ -539,7 +544,12 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                         {
                                                           pay === 'WebPay Plus'
                                                             ? (
-                                                              <form action={url} method="POST" id='formTransbank' className='mt-2'>
+                                                              <form action={url} method="POST" id='formTransbank' className='mt-2 flex flex-col gap-2'>
+                                                                {
+                                                                  error !== ''
+                                                                    ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                                    : ''
+                                                                }
                                                                 <input type="hidden" name="token_ws" value={token} />
                                                                 <Button style={style} action={async (e: any) => {
                                                                   e.preventDefault()
@@ -593,6 +603,11 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                           <p>MercadoPago</p>
                                                         </button>
                                                         {
+                                                          error !== ''
+                                                            ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                            : ''
+                                                        }
+                                                        {
                                                           pay === 'MercadoPagoPro'
                                                             ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2' width='250'>Pagar con MercadoPago</Button>
                                                             : ''
@@ -608,70 +623,77 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                     </div>
                                   </>
                                 )
-                                : <div className='flex flex-col gap-6 pb-6 px-6 md:pb-8 md:px-8 w-full'><Button style={style} config='w-full' loading={loading} action={async (e: any) => {
-                                  if (!loading) {
-                                    setLoading(true)
-                                    setError('')
-
-                                    const form = forms?.find(form => form._id === content.form)
-                                    let valid = true
-                                    let errorMessage = ''
-                                
-                                    // Función para obtener el valor del campo desde client o client.data
-                                    const getClientValue = (name: string) => client[name] || client.data?.find(dat => dat.name === name)?.value;
-                                
-                                    form?.labels.forEach(label => {
-                                      const value = getClientValue(label.data)
-                                      
-                                      if (label.data && (!value || value.trim() === '')) {
-                                        valid = false
-                                        errorMessage = `Por favor, completa el campo ${label.text || label.name}.`
-                                      }
-                                    })
-                                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                                    if (client.email && !emailRegex.test(client.email)) {
-                                      valid = false
-                                      errorMessage = 'Por favor, ingresa un correo electrónico válido.'
-                                    }
-                                
-                                    if (!valid) {
-                                      setError(errorMessage)
-                                      setLoading(false)
-                                      return
-                                    }
-                                    let currentClient = clientRef.current
-                                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-                                    const newEventId = new Date().getTime().toString()
-                                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
-                                      firstName: client.firstName,
-                                      lastName: client.lastName,
-                                      email: client.email,
-                                      phone: client.phone,
-                                      data: client.data,
-                                      form: client.forms![0].form,
-                                      fbc: Cookies.get('_fbc'),
-                                      fbp: Cookies.get('_fbp'),
-                                      service: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                                      funnel: client.funnel,
-                                      step: client.funnel?.step,
-                                      page: pathname,
-                                      eventId: newEventId
-                                    })
-                                    fbq('track', 'Lead', {
-                                      first_name: client.firstName,
-                                      last_name: client.lastName,
-                                      email: client.email,
-                                      phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
-                                      fbp: Cookies.get('_fbp'),
-                                      fbc: Cookies.get('_fbc'),
-                                      content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                                      contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
-                                      event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
-                                    }, { eventID: newEventId })
-                                    setFormCompleted(true)
-                                    setLoading(false)
+                                : <div className='flex flex-col gap-4 pb-6 px-6 md:pb-8 md:px-8 w-full'>
+                                  {
+                                    error !== ''
+                                      ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                      : ''
                                   }
-                                }}>Solicitar plan</Button></div>
+                                  <Button style={style} config='w-full' loading={loading} action={async (e: any) => {
+                                    if (!loading) {
+                                      setLoading(true)
+                                      setError('')
+
+                                      const form = forms?.find(form => form._id === content.form)
+                                      let valid = true
+                                      let errorMessage = ''
+                                  
+                                      // Función para obtener el valor del campo desde client o client.data
+                                      const getClientValue = (name: string) => client[name] || client.data?.find(dat => dat.name === name)?.value;
+                                  
+                                      form?.labels.forEach(label => {
+                                        const value = getClientValue(label.data)
+                                        
+                                        if (label.data && (!value || value.trim() === '')) {
+                                          valid = false
+                                          errorMessage = `Por favor, completa el campo ${label.text || label.name}.`
+                                        }
+                                      })
+                                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                                      if (client.email && !emailRegex.test(client.email)) {
+                                        valid = false
+                                        errorMessage = 'Por favor, ingresa un correo electrónico válido.'
+                                      }
+                                  
+                                      if (!valid) {
+                                        setError(errorMessage)
+                                        setLoading(false)
+                                        return
+                                      }
+                                      let currentClient = clientRef.current
+                                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                                      const newEventId = new Date().getTime().toString()
+                                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/lead`, {
+                                        firstName: client.firstName,
+                                        lastName: client.lastName,
+                                        email: client.email,
+                                        phone: client.phone,
+                                        data: client.data,
+                                        form: client.forms![0].form,
+                                        fbc: Cookies.get('_fbc'),
+                                        fbp: Cookies.get('_fbp'),
+                                        service: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
+                                        funnel: client.funnel,
+                                        step: client.funnel?.step,
+                                        page: pathname,
+                                        eventId: newEventId
+                                      })
+                                      fbq('track', 'Lead', {
+                                        first_name: client.firstName,
+                                        last_name: client.lastName,
+                                        email: client.email,
+                                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                                        fbp: Cookies.get('_fbp'),
+                                        fbc: Cookies.get('_fbc'),
+                                        content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
+                                        contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
+                                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                                      }, { eventID: newEventId })
+                                      setFormCompleted(true)
+                                      setLoading(false)
+                                    }
+                                  }}>Solicitar plan</Button>
+                                </div>
                             }
                           </>
                         )

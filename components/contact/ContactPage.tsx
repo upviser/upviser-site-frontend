@@ -178,7 +178,7 @@ export const ContactPage = ({ info, index, style }: { info: IInfo, index: any, s
             }
           </div>
           <div ref={tableRef} className={`${tableLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 w-full m-auto sm:w-[560px] xl:w-1/2`}>
-            <div className={`flex flex-col gap-4 p-6 sm:p-8`} style={{ boxShadow: style?.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style?.form === 'Redondeadas' ? `${style?.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: info.textColor, backgroundColor: info.image }}>
+            <div className={`flex flex-col gap-4 p-6 sm:p-8`} style={{boxShadow: style?.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style?.form === 'Redondeadas' ? `${style?.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: info.textColor, backgroundColor: info.image}}>
               {
                 error !== ''
                   ? <p className='bg-red-500 px-2 py-1 text-white w-fit'>{error}</p>

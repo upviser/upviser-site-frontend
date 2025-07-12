@@ -452,6 +452,16 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
             onSubmit={onSubmit}
             onReady={onReady}
             onError={onError}
+            customization={{
+              visual: {
+                style: {
+                  theme: 'flat',
+                  customVariables: {
+                    baseColor: style.primary
+                  }
+                }
+              }
+            }}
           />
         );
       }

@@ -297,6 +297,16 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
           onSubmit={onSubmit}
           onReady={onReady}
           onError={onError}
+          customization={{
+            visual: {
+              style: {
+                theme: 'flat',
+                customVariables: {
+                  baseColor: style.primary
+                }
+              }
+            }
+          }}
         />
       );
     }
@@ -331,7 +341,11 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
           localStorage.setItem('pay', JSON.stringify(response.data))
           localStorage.setItem('service2', JSON.stringify(service))
           window.location.href = link
+        } else {
+          setError('Debes ingresar un correo valido')
         }
+      } else {
+        setError('Debes llenar todos los datos')
       }
     }
   }
@@ -379,7 +393,11 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
             }
             setPaymentFailed(true)
           }
+        } else {
+          setError('Debes ingresar un correo valido')
         }
+      } else {
+        setError('Debes llenar todos los datos')
       }
     }
   }
@@ -519,7 +537,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                         ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
                                         : ''
                                     }
-                                    <Button type="submit" style={style} width='150'>Suscribirme</Button>
+                                    <Button type="submit" style={style} config='w-full md:w-[150px]'>Suscribirme</Button>
                                   </form>
                                 )
                                 : (
@@ -615,7 +633,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                                           }
                                                         }
                                                       }
-                                                    }} loading={transbankLoading} width='250'>Pagar con WebPay Plus</Button>
+                                                    }} loading={transbankLoading} config='w-full md:w-[250px]'>Pagar con WebPay Plus</Button>
                                                   </form>
                                                 )
                                                 : ''
@@ -639,7 +657,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                             }
                                             {
                                               pay === 'MercadoPagoPro'
-                                                ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2' width='250'>Pagar con MercadoPago</Button>
+                                                ? <Button action={mercadoSubmit} style={style} loading={submitLoading} config='mt-2 w-full md:w-[250px]'>Pagar con MercadoPago</Button>
                                                 : ''
                                             }
                                           </div>

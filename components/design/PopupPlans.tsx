@@ -218,6 +218,16 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
               onSubmit={onSubmit}
               onReady={onReady}
               onError={onError}
+              customization={{
+              visual: {
+                style: {
+                  theme: 'flat',
+                  customVariables: {
+                    baseColor: style.primary
+                  }
+                }
+              }
+            }}
             />
           );
         }
@@ -251,13 +261,13 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
             fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
             localStorage.setItem('pay', JSON.stringify(response.data))
             localStorage.setItem('service2', JSON.stringify(service))
+            window.location.href = link
           } else {
             setError('Debes ingresar un correo valido')
           }
         } else {
           setError('Debes llenar todos los datos')
         }
-        window.location.href = link
       }
     }
 
@@ -454,7 +464,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                 ? (
                                   <>
                                     <div className='flex flex-col gap-4'>
-                                      <H3 text='Pago' config='font-medium px-6 md:px-8' color={content.info.textColor} />
+                                      <p className='text-lg font-medium px-6 md:px-8'>Pago</p>
                                       {
                                         service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción'
                                           ? (
@@ -590,7 +600,11 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                                         if (form) {
                                                                           form.submit()
                                                                         }
+                                                                      } else {
+                                                                        setError('Debes ingresar un correo valido')
                                                                       }
+                                                                    } else {
+                                                                      setError('Debes llenar todos los datos')
                                                                     }
                                                                   }
                                                                 }} loading={transbankLoading} config='w-full'>Pagar con WebPay Plus</Button>

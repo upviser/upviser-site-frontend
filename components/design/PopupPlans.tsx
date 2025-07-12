@@ -251,7 +251,11 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
             fbq('track', 'AddPaymentInfo', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
             localStorage.setItem('pay', JSON.stringify(response.data))
             localStorage.setItem('service2', JSON.stringify(service))
+          } else {
+            setError('Debes ingresar un correo valido')
           }
+        } else {
+          setError('Debes llenar todos los datos')
         }
         window.location.href = link
       }
@@ -292,7 +296,11 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
             currentClient.services![0].payStatus = 'Pago no realizado'
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
           }
+        } else {
+          setError('Debes ingresar un correo valido')
         }
+      } else {
+        setError('Debes llenar todos los datos')
       }
     }
   }

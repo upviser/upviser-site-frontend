@@ -13,7 +13,7 @@ export default async function Page () {
     <div className="w-full p-4 flex">
       <div className="w-full max-w-[1280px] m-auto flex flex-col gap-4">
         <H1 text="Política de privacidad" />
-        <p>{politics.privacy}</p>
+        <p dangerouslySetInnerHTML={{ __html: politics.privacy.replace(/\n/g, "<br/>") }} />
       </div>
     </div>
   )

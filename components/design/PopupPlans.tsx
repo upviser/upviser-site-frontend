@@ -56,7 +56,6 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
   const [transbankLoading, setTransbankLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
   const [link, setLink] = useState('')
-  const [loadingSuscribe, setLoadingSuscribe] = useState(false)
   const [cardholderName, setCardholderName] = useState('')
   const [identificationType, setIdentificationType] = useState('')
   const [identificationNumber, setIdentificationNumber] = useState('')
@@ -148,48 +147,88 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
           if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
             if (emailRegex.test(clientRef.current.email)) {
               return new Promise<void>((resolve, reject) => {
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/process_payment`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify(formData),
-                })
-                  .then((response) => response.json())
-                  .then(async (response) => {
-                    console.log(response)
-                    paymentIdRef.current = response.id
-                    let currentClient = clientRef.current
-                    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
-                    if (res.data.email) {
-                      currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago realizado' : 'Pago realizado'
-                    } else {
-                      currentClient.services![0].payStatus = 'Pago realizado'
-                    }
-                    const service = services?.find(service => service._id === content.service?.service)
-                    currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-                    const price = Number(initializationRef.current.amount)
-                    const newEventId = new Date().getTime().toString()
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
-                    fbq('track', 'Purchase', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-                    socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
-                    setLoading(false)
-                    setPaymentCompleted(true)
-                    resolve();
+                if (service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') {
+                  fetch(`${process.env.NEXT_PUBLIC_API_URL}/suscribe`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cardToken: formData.token, price: initializationRef.current.amount, frequency: typePrice === 'Mensual' ? 'months' : 'years', email: clientRef.current.email }),
                   })
-                  .catch(async (error) => {
-                    let currentClient = clientRef.current
-                    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
-                    if (res.data.email) {
-                      currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago no realizado' : 'Pago no realizado'
-                    } else {
+                    .then((response) => response.json())
+                    .then(async (response) => {
+                      if (response.status === 'Processed') {
+                        let currentClient = clientRef.current
+                        currentClient.services![0].payStatus = 'Pago realizado'
+                        const service = services?.find(service => service._id === content.service?.service)
+                        currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
+                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                        const price = Number(initializationRef.current.amount)
+                        const newEventId = new Date().getTime().toString()
+                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
+                        fbq('track', 'Purchase', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                        socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+                        setLoading(false)
+                        setPaymentCompleted(true)
+                        resolve();
+                      } else {
+                        let currentClient = clientRef.current
+                        currentClient.services![0].payStatus = 'Pago no realizado'
+                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                        resolve();
+                      }
+                    })
+                    .catch(async (error) => {
+                      let currentClient = clientRef.current
                       currentClient.services![0].payStatus = 'Pago no realizado'
-                    }
-                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-                    reject();
-                  });
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                      reject();
+                    });
+                } else {
+                  fetch(`${process.env.NEXT_PUBLIC_API_URL}/process_payment`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                  })
+                    .then((response) => response.json())
+                    .then(async (response) => {
+                      console.log(response)
+                      paymentIdRef.current = response.id
+                      let currentClient = clientRef.current
+                      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+                      if (res.data.email) {
+                        currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago realizado' : 'Pago realizado'
+                      } else {
+                        currentClient.services![0].payStatus = 'Pago realizado'
+                      }
+                      const service = services?.find(service => service._id === content.service?.service)
+                      currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                      const price = Number(initializationRef.current.amount)
+                      const newEventId = new Date().getTime().toString()
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
+                      fbq('track', 'Purchase', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+                      socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+                      setLoading(false)
+                      setPaymentCompleted(true)
+                      resolve();
+                    })
+                    .catch(async (error) => {
+                      let currentClient = clientRef.current
+                      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/client-email/${currentClient.email}`)
+                      if (res.data.email) {
+                        currentClient.services![0].payStatus = res.data.services.find((service: any) => service.service === currentClient.services![0].service)?.payStatus === 'Pago realizado' ? 'Segundo pago no realizado' : 'Pago no realizado'
+                      } else {
+                        currentClient.services![0].payStatus = 'Pago no realizado'
+                      }
+                      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                      reject();
+                    });
+                }
               })
             } else {
               setError('Has ingresado un correo invalido')
@@ -225,6 +264,9 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                   customVariables: {
                     baseColor: style.primary
                   }
+                },
+                texts: {
+                  formTitle: service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción' ? 'Tarjeta de crédito' : 'Tarjeta de crédito o débito'
                 }
               }
             }}
@@ -271,53 +313,9 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
       }
     }
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    if (!loadingSuscribe) {
-      setLoadingSuscribe(true)
-      setError('')
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
-        if (emailRegex.test(clientRef.current.email)) {
-          const cardToken = await createCardToken({
-            cardholderName: cardholderName,
-            identificationType: identificationType,
-            identificationNumber: identificationNumber
-          })
-          console.log(cardToken)
-          const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/suscribe`, { cardToken: cardToken?.id, price: initializationRef.current.amount, frequency: typePrice === 'Mensual' ? 'months' : 'years', email: client.email })
-          console.log(res.data)
-          if (res.data.status === 'Processed') {
-            let currentClient = clientRef.current
-            currentClient.services![0].payStatus = 'Pago realizado'
-            const service = services?.find(service => service._id === content.service?.service)
-            currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-            const price = Number(initializationRef.current.amount)
-            const newEventId = new Date().getTime().toString()
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
-            fbq('track', 'Purchase', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
-            socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
-            setLoading(false)
-            setPaymentCompleted(true)
-          } else {
-            let currentClient = clientRef.current
-            currentClient.services![0].payStatus = 'Pago no realizado'
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
-          }
-        } else {
-          setError('Debes ingresar un correo valido')
-        }
-      } else {
-        setError('Debes llenar todos los datos')
-      }
-    }
-  }
-
   return (
     <div className={`${popup.view} ${popup.opacity} transition-opacity duration-200 w-full h-full top-0 fixed bg-black/30 flex z-50 px-4`}>
-      <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} max-w-[600px] transition-transform duration-200 w-full rounded-2xl max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }}>
+      <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} max-w-[800px] transition-transform duration-200 w-full rounded-2xl max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }}>
         {
           ((service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') && (payment?.suscription.active && payment.suscription.accessToken !== '' && payment.suscription.publicKey !== '')) || ((payment?.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '') || (payment?.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''))
             ? (
@@ -463,54 +461,18 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                               content.info.video === 'Realizar pago'
                                 ? (
                                   <>
-                                    <div className='flex flex-col gap-4'>
-                                      <p className='text-lg font-medium px-6 md:px-8'>Pago</p>
+                                    <div className='flex flex-col px-2 md:px-4'>
+                                      <p className='text-lg font-medium px-4'>Pago</p>
                                       {
                                         service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción'
                                           ? (
                                             <>
-                                              <form id="card-form" onSubmit={handleSubmit} className='flex flex-col gap-4 w-full px-6 pb-6 md:px-8 md:pb-8'>
-                                                <div className='flex flex-col gap-2'>
-                                                  <p>Nombre en la tarjeta</p>
-                                                  <Input inputChange={(e: any) => setCardholderName(e.target.value)} value={cardholderName} placeholder={'Nombre en la tarjeta'} style={style} />
-                                                </div>
-                                                <div className='flex flex-col gap-2'>
-                                                  <p>Numero de la tarjeta</p>
-                                                  <div className='border py-2 px-3 w-full text-sm transition-all duration-200 h-10 flex' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
-                                                    <MemoCardNumber placeholder="Número de tarjeta" />
-                                                  </div>
-                                                </div>
-                                                <div className='flex gap-2'>
-                                                  <div className='w-1/2 flex flex-col gap-2'>
-                                                    <p>Fecha de expiración</p>
-                                                    <div className='border py-2 px-3 w-full text-sm transition-all duration-200 h-10 flex' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
-                                                      <MemoExpirationDate placeholder="MM/AA" />
-                                                    </div>
-                                                  </div>
-                                                  <div className='w-1/2 flex flex-col gap-2'>
-                                                    <p>CVV</p>
-                                                    <div className='border py-2 px-3 w-full text-sm transition-all duration-200 h-10 flex' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
-                                                      <MemoSecurityCode placeholder="CVV" />
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                                <div className='flex flex-col gap-2'>
-                                                  <p>Documento de identidad</p>
-                                                  <div className='flex gap-2'>
-                                                    <Select selectChange={(e: any) => setIdentificationType(e.target.value)} value={identificationType} style={style}>
-                                                      <option>RUT</option>
-                                                      <option>Otro</option>
-                                                    </Select>
-                                                    <Input placeholder="Documento de identidad" inputChange={(e: any) => setIdentificationNumber(e.target.value)} value={identificationNumber} style={style} />
-                                                  </div>
-                                                </div>
-                                                {
-                                                  error !== ''
-                                                    ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
-                                                    : ''
-                                                }
-                                                <Button type="submit" style={style} config='w-full'>Suscribirme</Button>
-                                              </form>
+                                              {cardPaymentMemo}
+                                              {
+                                                error !== ''
+                                                  ? <p className='px-2 py-1 bg-red-500 text-white w-fit'>{error}</p>
+                                                  : ''
+                                              }
                                             </>
                                           )
                                           : (

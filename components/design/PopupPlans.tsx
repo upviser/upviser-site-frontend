@@ -169,6 +169,11 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                         fbq('track', 'Purchase', { first_name: clientRef.current.firstName, last_name: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone && clientRef.current.phone !== '' ? `56${clientRef.current.phone}` : undefined, content_name: service?._id, currency: "clp", value: price, contents: { id: service?._id, item_price: price, quantity: 1 }, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
                         socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
                         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
+                        if (content.service?.service === '682ad58f96c6028092e4ace1') {
+                          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`)
+                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { api: `https://api${res.data.length}.upviser.cl`, admin: `https://admin${res.data.length}.upviser.cl` })
+                          window.location.href = `https://admin${res.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}`
+                        }
                         setLoading(false)
                         setPaymentCompleted(true)
                         resolve();

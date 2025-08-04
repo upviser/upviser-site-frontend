@@ -147,7 +147,9 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
           if (clientRef.current.email !== '' && clientRef.current.firstName !== '' && clientRef.current.lastName !== '' && clientRef.current.phone !== '') {
             if (emailRegex.test(clientRef.current.email)) {
               return new Promise<void>((resolve, reject) => {
+                console.log('boton pago')
                 if (service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') {
+                  console.log('suscripcion')
                   fetch(`${process.env.NEXT_PUBLIC_API_URL}/suscribe`, {
                     method: 'POST',
                     headers: {
@@ -171,7 +173,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
                         if (content.service?.service === '682ad58f96c6028092e4ace1') {
                           const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`)
-                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { api: `https://api${res.data.length}.upviser.cl`, admin: `https://admin${res.data.length}.upviser.cl` })
+                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { email: clientRef.current.email, api: `https://api${Number(res.data.index) + 1}.upviser.cl`, admin: `https://admin${Number(res.data.index) + 1}.upviser.cl` })
                           window.location.href = `https://admin${res.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}`
                         }
                         setLoading(false)

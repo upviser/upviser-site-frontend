@@ -28,19 +28,28 @@ async function fetchDesign () {
   return res.json()
 }
 
+async function fetchIntegrations () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/integrations`)
+  return res.json()
+}
+
 export default async function Page () {
 
-  const storeData: IStoreData = await fetchStoreData()
+  const storeDataData = fetchStoreData()
 
-  const chilexpress = await fetchChilexpress()
+  const chilexpressData = fetchChilexpress()
 
-  const style = await fetchStyle()
+  const styleData = fetchStyle()
 
-  const payment = await fetchPayment()
+  const paymentData = fetchPayment()
 
-  const design = await fetchDesign()
+  const designData = fetchDesign()
+
+  const integrationsData = fetchIntegrations()
+
+  const [storeData, chilexpress, style, payment, design, integrations] = await Promise.all([storeDataData, chilexpressData, styleData, paymentData, designData, integrationsData])
 
   return (
-    <CheckoutPage storeData={storeData} chilexpress={chilexpress} style={style} payment={payment} design={design} />
+    <CheckoutPage storeData={storeData} chilexpress={chilexpress} style={style} payment={payment} design={design} integrations={integrations} />
   )
 }

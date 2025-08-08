@@ -61,6 +61,11 @@ async function fetchProducts () {
   return res.json()
 }
 
+async function fetchIntegrations () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/integrations`)
+  return res.json()
+}
+
 export async function generateMetadata({
   params
 }: {
@@ -101,7 +106,9 @@ export default async function Page({ params }: { params: { page: string } }) {
 
   const productsData = fetchProducts()
 
-  const [page, design, forms, calls, services, storeData, payment, style, categories, products] = await Promise.all([pageData, designData, formsData, callsData, servicesData, storeDataData, paymentData, styleData, categoriesData, productsData])
+  const integrationsData = fetchIntegrations()
+
+  const [page, design, forms, calls, services, storeData, payment, style, categories, products, integrations] = await Promise.all([pageData, designData, formsData, callsData, servicesData, storeDataData, paymentData, styleData, categoriesData, productsData, integrationsData])
 
   return (
     <div className="flex flex-col">
@@ -134,7 +141,7 @@ export default async function Page({ params }: { params: { page: string } }) {
           } else if (content.content === 'Llamadas') {
             return <Calls key={content.content} content={content} calls={calls} style={style} index={index} />
           } else if (content.content === 'Checkout') {
-            return <Checkout key={content.content} content={content} services={services} step={page.step} payment={payment} storeData={storeData} style={style} index={index} />
+            return <Checkout key={content.content} content={content} services={services} step={page.step} payment={payment} storeData={storeData} style={style} index={index} integrations={integrations} />
           } else if (content.content === 'Lead 2') {
             return <Lead2 key={content.content} content={content} forms={forms} index={index} step={page.step} services={services} storeData={storeData} style={style} />
           } else if (content.content === 'Planes') {

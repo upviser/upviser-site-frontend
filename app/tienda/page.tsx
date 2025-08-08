@@ -57,6 +57,11 @@ async function fetchStyle () {
   return res.json()
 }
 
+async function fetchIntegrations () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/integrations`)
+  return res.json()
+}
+
 export async function generateMetadata() {
   const design: Design = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/design`, { next: { revalidate: 3600 }}).then((res) => res.json())
   const home = design.pages?.find(page => page.page === 'Tienda')
@@ -91,7 +96,9 @@ export default async function ShopPage() {
 
   const styleData = fetchStyle()
 
-  const [design, products, categories, calls, forms, services, storeData, payment, style] = await Promise.all([designData, productsData, categoriesData, callsData, formsData, servicesData, storeDataData, paymentData, styleData])
+  const integrationsData = fetchIntegrations()
+
+  const [design, products, categories, calls, forms, services, storeData, payment, style, integrations] = await Promise.all([designData, productsData, categoriesData, callsData, formsData, servicesData, storeDataData, paymentData, styleData, integrationsData])
 
   return (
     <div className="flex flex-col">
@@ -126,7 +133,7 @@ export default async function ShopPage() {
               } else if (content.content === 'Llamadas') {
                 return <Calls key={content.content} content={content} calls={calls} style={style} index={index} />
               } else if (content.content === 'Checkout') {
-                return <Checkout key={content.content} content={content} services={services} payment={payment} storeData={storeData} style={style} index={index} />
+                return <Checkout key={content.content} content={content} services={services} payment={payment} storeData={storeData} style={style} index={index} integrations={integrations} />
               } else if (content.content === 'Lead 2') {
                 return <Lead2 key={content.content} content={content} forms={forms} index={index} services={services} storeData={storeData} style={style} />
               } else if (content.content === 'Planes') {

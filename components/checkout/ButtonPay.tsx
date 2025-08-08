@@ -129,7 +129,9 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
               Cookies.set('city', sell.city)
               Cookies.set('region', sell.region)
             }
-            fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+            if (typeof fbq === 'function') {
+              fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+            }
             const form = document.getElementById('formTransbank') as HTMLFormElement
             if (form) {
               form.submit()
@@ -187,7 +189,9 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
             Cookies.set('city', sell.city)
             Cookies.set('region', sell.region)
           }
-          fbq('track', 'Purchase', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+          if (typeof fbq === 'function') {
+            fbq('track', 'Purchase', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+          }
           router.push('/gracias-por-comprar')
         }
       }
@@ -291,7 +295,9 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
               Cookies.set('city', sell.city)
               Cookies.set('region', sell.region)
             }
-            fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+            if (typeof fbq === 'function') {
+              fbq('track', 'AddPaymentInfo', {contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping)})
+            }
             window.location.href = link
           } else {
             setError('Debes completar todos los datos')
@@ -370,10 +376,15 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
                         }]
                     }]
                   }
-                  localStorage.setItem('shippingData', JSON.stringify(shippingData))
-                  const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, { ...sellRef.current, state: 'Pago realizado' })
+                  const request = await axios.post('http://testservices.wschilexpress.com/transport-orders/api/v1.0/transport-orders', shippingData, {
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Cache-Control': 'no-cache',
+                      'Ocp-Apim-Subscription-Key': res.data.enviosKey
+                    }
+                  })
+                  await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/sells`, { ...sellRef.current, state: 'Pago realizado', shippingLabel: request.data.data.detail[0].label.labelData })
                   await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentSell, tags: sellRef.current.subscription ? ['Clientes', 'Suscriptores'] : ['Clientes'] })
-                  localStorage.setItem('sell', JSON.stringify(data))
                   sellRef.current.cart.map(async (product: any) => {
                     const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products/${product.slug}`)
                     let prod: IProduct = res.data
@@ -398,7 +409,9 @@ export const ButtonPay = ({ sell, clientId, saveData, token, link, url, style, p
                     }
                   })
                   const newEventId = new Date().getTime().toString()
-                  fbq('track', 'Purchase', {first_name: currentSell.current.firstName, last_name: currentSell.current.lastName, email: currentSell.current.email, phone: currentSell.current.phone && currentSell.current.phone !== '' ? `56${currentSell.current.phone}` : undefined, contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping), fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`}, { eventID: newEventId })
+                  if (typeof fbq === 'function') {
+                    fbq('track', 'Purchase', {first_name: currentSell.current.firstName, last_name: currentSell.current.lastName, email: currentSell.current.email, phone: currentSell.current.phone && currentSell.current.phone !== '' ? `56${currentSell.current.phone}` : undefined, contents: sell.cart, currency: "CLP", value: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping), fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`}, { eventID: newEventId })
+                  }
                   socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: 'Venta de productos de la tienda', url: '/pagos', view: false })
                   await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: 'Venta de productos de la tienda', url: '/pagos', view: false })
                   setLoading(false)

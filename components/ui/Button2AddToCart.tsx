@@ -27,10 +27,22 @@ export const Button2AddToCart: React.FC<Props> = ({ tempCartProduct }) => {
       if (cart.find((product: ICartProduct) => product.name === tempCartProduct.name)) {
         const productSelect = cart.find((product: ICartProduct) => product.name === tempCartProduct.name)
         if (productSelect?.variation?.variation === tempCartProduct.variation?.variation) {
-          const productIndex = cart.findIndex((product: ICartProduct) => product.name === tempCartProduct.name)
-          cart[productIndex].quantity = tempCartProduct.quantity + cart[productIndex].quantity
-          localStorage.setItem('cart', JSON.stringify(cart))
-          setCart(JSON.parse(localStorage.getItem('cart')!))
+          if (productSelect?.variation?.subVariation === tempCartProduct.variation?.subVariation) {
+            if (productSelect?.variation?.subVariation2 === tempCartProduct.variation?.subVariation2) {
+              const productIndex = cart.findIndex((product: ICartProduct) => product.name === tempCartProduct.name)
+              cart[productIndex].quantity = tempCartProduct.quantity + cart[productIndex].quantity
+              localStorage.setItem('cart', JSON.stringify(cart))
+              setCart(JSON.parse(localStorage.getItem('cart')!))
+            } else {
+              const cartFinal = cart.concat(tempCartProduct)
+              localStorage.setItem('cart', JSON.stringify(cartFinal))
+              setCart(JSON.parse(localStorage.getItem('cart')!))
+            }
+          } else {
+            const cartFinal = cart.concat(tempCartProduct)
+            localStorage.setItem('cart', JSON.stringify(cartFinal))
+            setCart(JSON.parse(localStorage.getItem('cart')!))
+          }
         } else {
           const cartFinal = cart.concat(tempCartProduct)
           localStorage.setItem('cart', JSON.stringify(cartFinal))
@@ -55,7 +67,9 @@ export const Button2AddToCart: React.FC<Props> = ({ tempCartProduct }) => {
       }
     }
     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/add-cart`, { product: tempCartProduct, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc') })
-    fbq('track', 'AddToCart', {content_name: tempCartProduct.name, content_type: tempCartProduct.category.category, currency: "clp", value: tempCartProduct.price * tempCartProduct.quantity, content_ids: `['${tempCartProduct._id}']`, contents: [{id: tempCartProduct._id, category: tempCartProduct.category.category, quantity: tempCartProduct.quantity, item_price: tempCartProduct.price, title: tempCartProduct.name}], event_id: res.data._id})
+    if (typeof fbq === 'function') {
+      fbq('track', 'AddToCart', {content_name: tempCartProduct.name, content_type: tempCartProduct.category.category, currency: "clp", value: tempCartProduct.price * tempCartProduct.quantity, content_ids: `['${tempCartProduct._id}']`, contents: [{id: tempCartProduct._id, category: tempCartProduct.category.category, quantity: tempCartProduct.quantity, item_price: tempCartProduct.price, title: tempCartProduct.name}], event_id: res.data._id})
+    }
     if (status === 'authenticated') {
       const cartLocal = JSON.parse(localStorage.getItem('cart')!)
       await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/account/${user._id}`, { cart: cartLocal })

@@ -17,16 +17,6 @@ interface Props {
 }
 
 export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef, setServiceTypeCode, serviceTypeCodeRef }) => {
-
-    const shippingChange = (e: any) => {
-        const ship = shipping?.find(ship => ship.serviceValue === e.target.value)
-        setServiceTypeCode(ship?.serviceTypeCode)
-        serviceTypeCodeRef.current = ship?.serviceTypeCode
-        setSell({ ...sell, shippingMethod: ship?.serviceDescription, shipping: e.target.value, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(e.target.value) })
-        sellRef.current = { ...sell, shippingMethod: ship?.serviceDescription, shipping: e.target.value, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(e.target.value) }
-        initializationRef.current = { amount: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(e.target.value) }
-      }
-
   return (
     <>
       {
@@ -37,9 +27,22 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
               <div className='flex flex-col gap-2'>
                 {
                   shipping.map(item => (
-                    <button className='flex gap-2 justify-between p-2 border dark:border-neutral-700' name='shipping' value={item.serviceValue} onChange={shippingChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} key={item.serviceDescription}>
+                    <button className='flex gap-2 justify-between p-2 border dark:border-neutral-700' name='shipping' value={item.serviceDescription} onClick={(e: any) => {
+                      e.preventDefault()
+                      setServiceTypeCode(item.serviceTypeCode)
+                      serviceTypeCodeRef.current = item.serviceTypeCode
+                      setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) })
+                      sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
+                      initializationRef.current = { amount: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
+                    }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} key={item.serviceTypeCode}>
                       <div className='flex gap-2'>
-                        <input type='radio' checked={sell.shipping === Number(item.serviceValue)} />
+                        <input type='radio' onChange={() => {
+                          setServiceTypeCode(item.serviceTypeCode)
+                          serviceTypeCodeRef.current = item.serviceTypeCode
+                          setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) })
+                          sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
+                          initializationRef.current = { amount: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
+                        }} checked={sell.shippingMethod === item.serviceDescription} />
                         <p className='text-sm mt-auto mb-auto'>{item.serviceDescription}</p>
                       </div>
                       <p className='text-sm'>${NumberFormat(Number(item.serviceValue))}</p>
@@ -60,9 +63,9 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                 {
                   payment.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== ''
                     ? (
-                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='MercadoPago' onChange={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                        <input type='radio' checked={sell.pay === 'MercadoPago'} />
-                        <p className='text-sm'>Tarjeta de Credito o Debito</p>
+                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='MercadoPago' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                        <input type='radio' name='pay' value='MercadoPago' onChange={inputChange} checked={sell.pay === 'MercadoPago'} />
+                        <button name='pay' value='MercadoPago' onClick={inputChange} className='text-sm'>Tarjeta de Credito o Debito</button>
                       </button>
                     )
                     : ''
@@ -70,9 +73,9 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                 {
                   payment.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== ''
                     ? (
-                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='WebPay Plus' onChange={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                        <input type='radio' checked={sell.pay === 'WebPay Plus'} />
-                        <p className='text-sm'>WebPay Plus</p>
+                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='WebPay Plus' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                        <input type='radio' name='pay' value='WebPay Plus' onChange={inputChange} checked={sell.pay === 'WebPay Plus'} />
+                        <button name='pay' value='WebPay Plus' onClick={inputChange} className='text-sm'>WebPay Plus</button>
                       </button>
                     )
                     : ''
@@ -80,9 +83,9 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                 {
                   payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''
                     ? (
-                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='MercadoPagoPro' onChange={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
-                        <input type='radio' checked={sell.pay === 'MercadoPagoPro'} />
-                        <p className='text-sm'>MercadoPago</p>
+                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='MercadoPagoPro' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                        <input type='radio' name='pay' value='MercadoPagoPro' onChange={inputChange} checked={sell.pay === 'MercadoPagoPro'} />
+                        <button name='pay' value='MercadoPagoPro' onClick={inputChange} className='text-sm'>MercadoPago</button>
                       </button>
                     )
                     : ''

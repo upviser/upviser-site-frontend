@@ -8,7 +8,7 @@ import { H2 } from "../ui"
 
 declare const fbq: Function
 
-export default function PageProduct ({ product, design, products, categories, style }: { product: IProduct, design: Design, products: IProduct[], categories: ICategory[], style: any }) {
+export default function PageProduct ({ product, design, products, categories, style, integrations }: { product: IProduct, design: Design, products: IProduct[], categories: ICategory[], style: any , integrations: any}) {
 
   const [tempCartProduct, setTempCartProduct] = useState<ICartProduct>({
     _id: product._id,
@@ -29,11 +29,24 @@ export default function PageProduct ({ product, design, products, categories, st
 
   const viewContent = async () => {
     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/view-content`, { product: product, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc') })
-    fbq('track', 'ViewContent', {content_name: product.name, content_category: product.category.category, currency: "clp", value: product.price, content_ids: [product._id], contents: { id: product._id, category: product.category.category, item_price: product.price, title: product.name }, event_id: res.data._id})
+    if (typeof fbq === 'function') {
+      fbq('track', 'ViewContent', {content_name: product.name, content_category: product.category.category, currency: "clp", value: product.price, content_ids: [product._id], contents: { id: product._id, category: product.category.category, item_price: product.price, title: product.name }, event_id: res.data._id})
+    }
   }
 
   useEffect(() => {
-    viewContent()
+    if (integrations.apiPixelId && integrations.apiPixelId !== '') {
+      const interval = setInterval(() => {
+        if (typeof fbq === 'function') {
+          viewContent()
+          clearInterval(interval)
+        }
+      }, 100)
+    
+      return () => clearInterval(interval)
+    } else {
+      viewContent()
+    }
   }, [])
 
   const updateData = async () => {

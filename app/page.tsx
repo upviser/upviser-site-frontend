@@ -55,6 +55,11 @@ async function fetchProducts () {
   return res.json()
 }
 
+async function fetchIntegrations () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/integrations`)
+  return res.json()
+}
+
 export async function generateMetadata() {
   const design: Design = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/design`, { next: { revalidate: 3600 } }).then((res) => res.json())
   const home = design.pages?.find(page => page.page === 'Inicio')
@@ -90,7 +95,9 @@ export default async function Home() {
 
   const productsData = fetchProducts()
 
-  const [design, forms, calls, services, storeData, payment, style, categories, products] = await Promise.all([designData, formsData, callsData, servicesData, storeDataData, paymentData, styleData, categoriesData, productsData])
+  const integrationsData = fetchIntegrations()
+
+  const [design, forms, calls, services, storeData, payment, style, categories, products, integrations] = await Promise.all([designData, formsData, callsData, servicesData, storeDataData, paymentData, styleData, categoriesData, productsData, integrationsData])
 
   return (
     <div className="flex flex-col">
@@ -128,7 +135,7 @@ export default async function Home() {
                     } else if (content.content === 'Llamadas') {
                       return <Calls key={content.content} content={content} calls={calls} style={style} index={index} />
                     } else if (content.content === 'Checkout') {
-                      return <Checkout key={content.content} content={content} services={services} payment={payment} storeData={storeData} style={style} index={index} />
+                      return <Checkout key={content.content} content={content} services={services} payment={payment} storeData={storeData} style={style} index={index} integrations={integrations} />
                     } else if (content.content === 'Lead 2') {
                       return <Lead2 key={content.content} content={content} forms={forms} index={index} services={services} storeData={storeData} style={style} />
                     } else if (content.content === 'Servicios') {

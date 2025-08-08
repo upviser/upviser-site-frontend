@@ -17,9 +17,10 @@ interface Props {
   style: any
   payment?: any
   design : Design
+  integrations: any
 }
 
-export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, payment, design }) => {
+export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, payment, design, integrations }) => {
 
   const {cart, setCart} = useContext(CartContext)
   
@@ -145,8 +146,8 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
         }
       }
     }
-    if (typeof window !== 'undefined') {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/information`, { cart: cart, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc') })
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/information`, { cart: cart, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc') })
+    if (typeof fbq === 'function') {
       fbq('track', 'InitiateCheckout', {contents: cart?.map(product => ({ id: product._id, quantity: product.quantity, category: product.category.category, item_price: product.price, title: product.name })), currency: "clp", value: cart!.reduce((bef, curr) => curr.quantityOffers?.length ? offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping), content_ids: cart?.map(product => product._id), event_id: res.data._id})
     }
   }
@@ -154,8 +155,15 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   useEffect(() => {
     const interval = setInterval(() => {
       if (cart?.length) {
-        getClientData()
-        clearInterval(interval)
+        if (integrations.apiPixelId && integrations.apiPixelId !== '') {
+          if (typeof fbq === 'function') {
+            getClientData()
+            clearInterval(interval)
+          }
+        } else {
+          getClientData()
+          clearInterval(interval)
+        }
       }
     }, 100)
     
@@ -179,6 +187,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   }, [])
 
   const inputChange = async (e: any) => {
+    e.preventDefault()
     setSell({ ...sell, [e.target.name]: e.target.value, buyOrder: `${storeData?.name ? storeData.name : 'ORDEN'}${Math.floor(Math.random() * 10000) + 1}` })
     sellRef.current = { ...sell, [e.target.name]: e.target.value, buyOrder: `${storeData?.name ? storeData.name : 'ORDEN'}${Math.floor(Math.random() * 10000) + 1}` }
     if (e.target.name === 'pay' && e.target.value === 'WebPay Plus') {
@@ -189,7 +198,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay/create`, pago)
       setToken(response.data.token)
       setUrl(response.data.url)
-    } else if (e.target.name === 'pay' && e.target.value === 'MercadoPago') {
+    } else if (e.target.name === 'pay' && e.target.value === 'MercadoPagoPro') {
       let products: any[] = []
       sell.cart.map((product: any) => {
         products = products.concat({ title: product.name, unit_price: product.price, quantity: product.quantity })

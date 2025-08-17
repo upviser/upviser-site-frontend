@@ -3,6 +3,13 @@ import { Spinner } from '@/components/ui'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
+import { io } from 'socket.io-client'
+
+declare const fbq: Function
+
+const socket = io(`${process.env.NEXT_PUBLIC_API_URL}/`, {
+  transports: ['websocket']
+})
 
 export default function PayProcess () {
 
@@ -33,6 +40,12 @@ export default function PayProcess () {
             await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: [service] })
           } else if (localStorage.getItem('meetingData')) {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/meeting`, JSON.parse(localStorage.getItem('meetingData')!))
+            if (typeof fbq === 'function') {
+              const meetingEvent = JSON.parse(localStorage.getItem('meetingEvent')!)
+              fbq('track', 'schedule', { ...meetingEvent }, { eventID: meetingEvent.eventID })
+            }
+            socket.emit('newNotification', { title: 'Nueva reunion agendada:', description: JSON.parse(localStorage.getItem('meetingData')!).nameMeeting, url: '/reuniones', view: false })
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nueva reunion agendada:', description: JSON.parse(localStorage.getItem('meetingData')!).nameMeeting, url: '/reuniones', view: false })
           }
           router.push('/gracias-por-comprar')
         } else if (response.data.status === 'FAILED') {
@@ -53,6 +66,7 @@ export default function PayProcess () {
           localStorage.setItem('service', '')
           localStorage.setItem('service2', '')
           localStorage.setItem('meetingData', '')
+          localStorage.setItem('meetingEvent', '')
           router.push('/pago-fallido')
         }
       } else if (sell) {
@@ -96,6 +110,12 @@ export default function PayProcess () {
             await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/client/${pay.email}`, { services: [service] })
           } else if (localStorage.getItem('meetingData')) {
             await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/meeting`, JSON.parse(localStorage.getItem('meetingData')!))
+            if (typeof fbq === 'function') {
+              const meetingEvent = JSON.parse(localStorage.getItem('meetingEvent')!)
+              fbq('track', 'schedule', { ...meetingEvent }, { eventID: meetingEvent.eventID })
+            }
+            socket.emit('newNotification', { title: 'Nueva reunion agendada:', description: JSON.parse(localStorage.getItem('meetingData')!).nameMeeting, url: '/reuniones', view: false })
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nueva reunion agendada:', description: JSON.parse(localStorage.getItem('meetingData')!).nameMeeting, url: '/reuniones', view: false })
           }
           router.push('/gracias-por-comprar')
         } else {
@@ -116,6 +136,7 @@ export default function PayProcess () {
           localStorage.setItem('service', '')
           localStorage.setItem('service2', '')
           localStorage.setItem('meetingData', '')
+          localStorage.setItem('meetingEvent', '')
           router.push('/pago-fallido')
         }
       } else if (sell) {
@@ -158,6 +179,7 @@ export default function PayProcess () {
         localStorage.setItem('service', '')
         localStorage.setItem('service2', '')
         localStorage.setItem('meetingData', '')
+        localStorage.setItem('meetingEvent', '')
         router.push('/pago-fallido')
       } else if (sell) {
         await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/sell/${sell._id}`, { state: 'Pago no realizado' })

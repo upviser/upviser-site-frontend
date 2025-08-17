@@ -135,7 +135,7 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
         design.popup?.active
           ? (
             <div className={`${popup.view} ${popup.opacity} transition-opacity duration-200 w-full h-full fixed bg-black/30 flex z-50 px-4`}>
-              <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} ${calls.find(call => call._id === design.popup?.content) ? 'max-w-[800px]' : 'max-w-[600px]'} transition-transform duration-200 w-full p-6 max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col gap-4`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }}>
+              <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} ${calls.find(call => call._id === design.popup?.content) ? 'max-w-[800px]' : 'max-w-[600px]'} ${calls.find(call => call._id === design.popup?.content) && ((design.popup.title && design.popup.title !== '') || (design.popup.description && design.popup.description !== '') || (design.popup.buttonText && design.popup.buttonText !== '' && design.popup.buttonLink && design.popup.buttonLink !== '')) ? 'p-6' : ''} ${forms.find(form => form._id === design.popup?.content) && ((design.popup.title && design.popup.title !== '') || (design.popup.description && design.popup.description !== '') || (design.popup.buttonText && design.popup.buttonText !== '' && design.popup.buttonLink && design.popup.buttonLink !== '')) ? 'p-6' : ''} transition-transform duration-200 w-full max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col gap-4`} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' && (calls.find(call => call._id === design.popup?.content) && ((design.popup.title && design.popup.title !== '') || (design.popup.description && design.popup.description !== '') || (design.popup.buttonText && design.popup.buttonText !== '' && design.popup.buttonLink && design.popup.buttonLink !== '')) || forms.find(form => form._id === design.popup?.content) && ((design.popup.title && design.popup.title !== '') || (design.popup.description && design.popup.description !== '') || (design.popup.buttonText && design.popup.buttonText !== '' && design.popup.buttonLink && design.popup.buttonLink !== ''))) ? `1px solid ${style.borderColor}` : '' }}>
                 {
                   message !== ''
                     ? <p>{message}</p>
@@ -201,7 +201,7 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
                               )
                               : forms?.find(form => form._id === design.popup?.content)
                               ? (
-                                <form className="flex w-full" onSubmit={async (e: any) => {
+                                <form className="flex" onSubmit={async (e: any) => {
                                   e.preventDefault()
                                   if (!loading) {
                                     setLoading(true)
@@ -275,7 +275,7 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
                                     setLoading(false)
                                   }
                                 }}>
-                                  <div className="flex flex-col gap-4 h-fit m-auto w-full p-6 max-w-[500px]" style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: '#111111', backgroundColor: '#ffffff' }}>
+                                  <div className="flex flex-col gap-4 h-fit m-auto w-full p-6" style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', color: '#111111', backgroundColor: '#ffffff' }}>
                                     {
                                       message !== ''
                                         ? <p className='text-lg text-center font-medium'>{message}</p>
@@ -355,7 +355,7 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
                               setTimeout(() => {
                                 setPopup({ ...popup, view: 'hidden', opacity: 'opacity-0' })
                               }, 200);
-                            }}>{design.popup.buttonText}</Button>
+                            }} style={style}>{design.popup.buttonText}</Button>
                             : ''
                         }
                       </>

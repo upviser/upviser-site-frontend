@@ -31,6 +31,7 @@ const PageBuySuccess = () => {
       localStorage.setItem('service', '')
       localStorage.setItem('service2', '')
       localStorage.setItem('meetingData', '')
+      localStorage.setItem('meetingEvent', '')
     } else if (localStorage.getItem('sell')) {
       const sell: ISell = JSON.parse(localStorage.getItem('sell')!)
       if (typeof fbq === 'function') {

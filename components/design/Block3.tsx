@@ -229,9 +229,9 @@ export const Block3 = ({ content, index, calls, forms, design, payment, style, s
                             setTimeout(() => {
                               setPopup({ ...popup, view: 'flex', opacity: 'opacity-1' })
                             }, 10);
-                          }} config='mx-auto' style={style} content={content}>{content.info.button2}</ButtonSecondary>
+                          }} config='mx-auto text-[#292929]' style={style} content={content}>{content.info.button2}</ButtonSecondary>
                           : content.info.buttonLink2 && content.info.buttonLink2 !== '' || content.info.button2 && content.info.button2 !== ''
-                            ? <Link href={`${content.info.buttonLink2}`} className='mx-auto'><ButtonSecondary style={style} content={content}>{content.info.button2}</ButtonSecondary></Link>
+                            ? <Link href={`${content.info.buttonLink2}`} className='mx-auto text-[#292929]'><ButtonSecondary style={style} content={content}>{content.info.button2}</ButtonSecondary></Link>
                             : ''
                       }
                     </div>

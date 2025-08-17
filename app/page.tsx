@@ -141,7 +141,7 @@ export default async function Home() {
                     } else if (content.content === 'Servicios') {
                       return <Services key={content.content} content={content} services={services} index={index} style={style} />
                     } else if (content.content === 'Planes') {
-                      return <Plans key={content.content} content={content} services={services} index={index} payment={payment} style={style} forms={forms} />
+                      return <Plans key={content.content} content={content} services={services} index={index} payment={payment} style={style} forms={forms} integrations={integrations} />
                     } else if (content.content === 'Preguntas frecuentes') {
                       return <Faq key={content.content} content={content} services={services} index={index} />
                     } else if (content.content === 'Lead 3') {

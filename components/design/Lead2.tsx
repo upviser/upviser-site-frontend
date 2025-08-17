@@ -339,18 +339,19 @@ export const Lead2 = ({ content, forms, step, index, services, storeData, style 
                         page: pathname,
                         eventId: newEventId
                       })
-                  
-                      fbq('track', 'Lead', {
-                        first_name: client.firstName,
-                        last_name: client.lastName,
-                        email: client.email,
-                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
-                        fbp: Cookies.get('_fbp'),
-                        fbc: Cookies.get('_fbc'),
-                        content_name: service?._id,
-                        contents: { id: service?._id, quantity: 1 },
-                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
-                      }, { eventID: newEventId })
+                      if (typeof fbq === 'function') {
+                        fbq('track', 'Lead', {
+                          first_name: client.firstName,
+                          last_name: client.lastName,
+                          email: client.email,
+                          phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                          fbp: Cookies.get('_fbp'),
+                          fbc: Cookies.get('_fbc'),
+                          content_name: service?._id,
+                          contents: { id: service?._id, quantity: 1 },
+                          event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                        }, { eventID: newEventId })
+                      }
                     } else {
                       await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, client)
                       const newEventId = new Date().getTime().toString()
@@ -366,17 +367,19 @@ export const Lead2 = ({ content, forms, step, index, services, storeData, style 
                         page: pathname,
                         eventId: newEventId
                       })
-                      fbq('track', 'Lead', {
-                        first_name: client.firstName,
-                        last_name: client.lastName,
-                        email: client.email,
-                        phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
-                        fbp: Cookies.get('_fbp'),
-                        fbc: Cookies.get('_fbc'),
-                        content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
-                        contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
-                        event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
-                      }, { eventID: newEventId })
+                      if (typeof fbq === 'function') {
+                        fbq('track', 'Lead', {
+                          first_name: client.firstName,
+                          last_name: client.lastName,
+                          email: client.email,
+                          phone: client.phone && client.phone !== '' ? `56${client.phone}` : undefined,
+                          fbp: Cookies.get('_fbp'),
+                          fbc: Cookies.get('_fbc'),
+                          content_name: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined,
+                          contents: { id: client.services?.length && client.services[0].service !== '' ? client.services[0].service : undefined, quantity: 1 },
+                          event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}`
+                        }, { eventID: newEventId })
+                      }
                     }
                 
                     if (form?.action === 'Ir a una pagina') {

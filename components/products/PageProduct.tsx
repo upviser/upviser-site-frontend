@@ -35,7 +35,7 @@ export default function PageProduct ({ product, design, products, categories, st
   }
 
   useEffect(() => {
-    if (integrations.apiPixelId && integrations.apiPixelId !== '') {
+    if (integrations?.apiPixelId && integrations.apiPixelId !== '') {
       const interval = setInterval(() => {
         if (typeof fbq === 'function') {
           viewContent()

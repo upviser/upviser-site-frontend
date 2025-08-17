@@ -143,7 +143,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
   }
 
   useEffect(() => {
-    if (integrations.apiPixelId && integrations.apiPixelId !== '') {
+    if (integrations?.apiPixelId && integrations.apiPixelId !== '') {
       const interval = setInterval(() => {
         if (typeof fbq === 'function') {
           viewCheckout()

@@ -153,21 +153,18 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   }
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (cart?.length) {
-        if (integrations.apiPixelId && integrations.apiPixelId !== '') {
-          if (typeof fbq === 'function') {
-            getClientData()
-            clearInterval(interval)
-          }
-        } else {
+    if (integrations?.apiPixelId && integrations.apiPixelId !== '' && cart?.length) {
+      const interval = setInterval(() => {
+        if (typeof fbq === 'function') {
           getClientData()
           clearInterval(interval)
         }
-      }
-    }, 100)
-    
-    return () => clearInterval(interval)
+      }, 100)
+      
+      return () => clearInterval(interval)
+    } else {
+      getClientData()
+    }
   }, [])
 
   useEffect(() => {

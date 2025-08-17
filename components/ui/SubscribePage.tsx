@@ -30,7 +30,9 @@ export const SubscribePage = ({ info, style }: { info: IInfo, style?: any }) => 
       if (emailRegex.test(subscribeData.email)) {
         const newEventId = new Date().getTime().toString()
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...subscribeData, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), page: pathname, eventId: newEventId })
-        fbq('track', 'Lead', { email: subscribeData.email, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+        if (typeof fbq === 'function') {
+          fbq('track', 'Lead', { email: subscribeData.email, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+        }
         setSubscribeData({ ...subscribeData, email: '' })
         setSend(true)
       } else {

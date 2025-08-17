@@ -133,7 +133,9 @@ export const ContactPage = ({ info, index, style }: { info: IInfo, index: any, s
           const newEventId = new Date().getTime().toString()
           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/contact`, { ...formContact, fbc: Cookies.get('_fbc'), fbp: Cookies.get('_fbp'), page: pathname, eventId: newEventId })
           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { firstName: formContact.name, email: formContact.email, tags: ['formulario-contacto'] })
-          fbq('track', 'Contact', { first_name: formContact.name, email: formContact.email, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+          if (typeof fbq === 'function') {
+            fbq('track', 'Contact', { first_name: formContact.name, email: formContact.email, fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), event_source_url: `${process.env.NEXT_PUBLIC_WEB_URL}${pathname}` }, { eventID: newEventId })
+          }
           setSending('Mensaje enviado')
           setFormContact({name: '', email: '', message: '', images: []})
           setTimeout(() => {

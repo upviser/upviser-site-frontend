@@ -103,9 +103,9 @@ export default async function ShopPage() {
   return (
     <div className="flex flex-col">
       {
-        design?.pages?.map((page: any, index: any) => {
+        design?.pages?.map((page: any) => {
           if (page.page === 'Tienda') {
-            return page.design.map((content: any) => {
+            return page.design.map((content: any, index: any) => {
               if (content.content === 'Carrusel') {
                 return <Slider key={content.content} info={content.info} index={index} forms={forms} calls={calls} design={design} payment={payment} style={style} storeData={storeData} />
               } else if (content.content === 'Bloque 1') {

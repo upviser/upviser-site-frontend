@@ -58,7 +58,16 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
 
   useEffect(() => {
     if (categoriesPhoneRef.current) {
-      setCategoriesPhone(rotate === '-rotate-90' ? 120 * categories!.length : 0)
+      if (rotate === '-rotate-90') {
+        // Calculamos el alto sumando cada categoría
+        const totalHeight = categories!.reduce((acc, category) => {
+          return acc + (category.image && category.image !== '' ? 120 : 30)
+        }, 0)
+
+        setCategoriesPhone(totalHeight)
+      } else {
+        setCategoriesPhone(0)
+      }
     }
   }, [rotate])
 
@@ -473,7 +482,11 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
                                     setElement10(false)
                                   }, 500)
                                 }} href={`/tienda/${category.slug}`} className='flex gap-2 mb-2' key={category._id}>
-                                  <Image className='w-28 rounded-md h-auto' src={category.image!} width={112} height={112} alt={`Categoria ${category.category}`} />
+                                  {
+                                    category.image && category.image !== ''
+                                      ? <Image className='w-28 rounded-md h-auto' src={category.image!} width={112} height={112} alt={`Categoria ${category.category}`} />
+                                      : ''
+                                  }
                                   <p className='mt-auto text-[#1c1b1b] font-medium mb-auto dark:text-white'>{category.category}</p>
                                 </Link>
                               ))
@@ -562,16 +575,22 @@ export const Navbar: React.FC<PropsWithChildren<Props>> = ({ children, design, s
           {
             categories?.length
               ? (
-                <div className='w-full bg-white p-4 flex gap-4 border-b justify-center dark:bg-neutral-900 dark:border-neutral-800'>
+                <div className='w-full min-h-[330px] bg-white p-4 flex gap-4 border-b justify-center dark:bg-neutral-900 dark:border-neutral-800'>
                   {categories.map(category => (
-                    <div key={category._id}>
-                      <Image className='w-64h-auto mb-2 cursor-pointer' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }} onClick={() => {
-                        setNavCategoriesOpacity('-mt-[330px]')
-                        router.push(`/tienda/${category.slug}`)
-                      }} src={category.image!} width={256} height={256} alt={`Categoria ${category.category}`} />
+                    <div key={category._id} className='my-auto flex flex-col gap-1'>
+                      {
+                        category.image && category.image !== ''
+                          ? (
+                            <Image className='w-64h-auto mb-2 cursor-pointer' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }} onClick={() => {
+                              setNavCategoriesOpacity('-mt-[330px]')
+                              router.push(`/tienda/${category.slug}`)
+                            }} src={category.image!} width={256} height={256} alt={`Categoria ${category.category}`} />
+                          )
+                          : ''
+                      }
                       <Link href={`/tienda/${category.slug}`} onClick={() => {
                         setNavCategoriesOpacity('-mt-[330px]')
-                      }} className='m-auto font-medium text-[#1c1b1b] dark:text-white'>{category.category}</Link>
+                      }} className='m-auto text-[#1c1b1b] dark:text-white'>{category.category}</Link>
                     </div>
                   ))}
                 </div>

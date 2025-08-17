@@ -181,9 +181,9 @@ export default async function CategoryPage({ params }: { params: { category: str
           } else if (content.content === 'Bloque 6') {
             return (
               <div key={content.content} className="w-full flex">
-                <div className={`${category.image ? 'h-64 xl:h-80 2xl:h-96 text-white' : 'pt-10 pb-2'} w-full max-w-[1360px] m-auto flex flex-col gap-2`}>
-                  <div className="m-auto flex flex-col gap-2">
-                    <H1 text={category.category} config="text-center font-semibold" />
+                <div className={`${category.banner ? 'h-64 xl:h-80 2xl:h-96 text-white' : 'py-20'} w-full max-w-[1360px] m-auto flex flex-col gap-4`}>
+                  <div className="m-auto flex flex-col gap-4">
+                    <H1 text={category.category} config="text-center" />
                     <p className="text-center">{category.description}</p>
                   </div>
                 </div>

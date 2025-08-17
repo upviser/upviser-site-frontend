@@ -12,9 +12,10 @@ interface Props {
     payment: IPayment
     step?: string
     style?: any
+    integrations: any
 }
 
-export const Table: React.FC<Props> = ({ content, services, index, payment, step, style }) => {
+export const Table: React.FC<Props> = ({ content, services, index, payment, step, style, integrations }) => {
 
   const [popup, setPopup] = useState({ view: 'hidden', opacity: 'opacity-0', mouse: false })
   const [plan, setPlan] = useState<IPlan>()
@@ -100,7 +101,7 @@ export const Table: React.FC<Props> = ({ content, services, index, payment, step
 
   return (
     <>
-      <PopupPlans popup={popup} setPopup={setPopup} plan={plan} services={services} payment={payment} content={content} step={step} style={style} />
+      <PopupPlans popup={popup} setPopup={setPopup} plan={plan} services={services} payment={payment} content={content} step={step} style={style} integrations={integrations} />
       <div className={`py-10 md:py-20 px-4 m-auto w-full flex`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}`, color: content.info.textColor }}>
         <div className='flex flex-col gap-8 m-auto w-full max-w-[1280px]'>
           {

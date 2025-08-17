@@ -155,7 +155,7 @@ export default async function CategoryPage({ params }: { params: { category: str
           } else if (content.content === 'Lead 3') {
             return <Lead3 key={content.content} content={content} services={services} index={index} style={style} forms={forms} storeData={storeData} />
           } else if (content.content === 'Tabla comparativa') {
-            return <Table key={content.content} content={content} services={services} index={index} payment={payment} style={style} />
+            return <Table key={content.content} content={content} services={services} index={index} payment={payment} style={style} integrations={integrations} />
           } else if (content.content === 'Bloques') {
             return <Blocks key={content.content} content={content} index={index} style={style} storeData={storeData} />
           } else if (content.content === 'Formulario') {

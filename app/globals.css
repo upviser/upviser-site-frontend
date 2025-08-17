@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --font-body: var(--font-body);
+  --font-heading: var(--font-heading);
+}
+
+body {
+  font-family: var(--font-body), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), serif;
+}

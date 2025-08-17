@@ -12,6 +12,6 @@ interface Props {
 
 export const ButtonSecondary: React.FC<PropsWithChildren<Props>> = ({ children, action, config, type, loading, style, content }) => {
   return (
-    <button type={type ? type : 'button'} onClick={action} className={`${config} ${loading !== undefined ? loading ? `cursor-not-allowed` : `` : ``} h-10 px-6 w-fit transition-colors duration-300 font-medium border`} style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '', border: `1px solid ${style.borderColor}`, color: content?.info?.textColor }}>{ loading !== undefined ? loading ? <Spinner2 /> : children : children }</button>
+    <button type={type ? type : 'button'} onClick={action} className={`${config} ${loading !== undefined ? loading ? `cursor-not-allowed` : `` : ``} h-10 px-6 w-fit transition-colors duration-300 font-medium border`} style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '', border: `1px solid ${style.borderColor}` }}>{ loading !== undefined ? loading ? <Spinner2 /> : children : children }</button>
   )
 }

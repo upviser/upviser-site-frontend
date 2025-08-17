@@ -60,7 +60,7 @@ export const SubscribePage = ({ info, style }: { info: IInfo, style?: any }) => 
             )
             : (
               <>
-                <span className='text-center font-bold text-xl lg:text-3xl' style={{ color: info.textColor }}>{info?.title ? info.title : 'Suscribete a nuestra lista'}</span>
+                <H3 text={info?.title ? info.title : 'Suscribete a nuestra lista'} color={info.textColor} config='m-auto text-center' />
                 <div className='flex gap-2'>
                   <Input inputChange={inputChange} type='text' placeholder={'Email'} value={subscribeData.email} style={style} />
                   <ButtonSubmit action={handleSubmit} submitLoading={loading} textButton='Enviar' config='w-28' style={style} />

@@ -103,7 +103,7 @@ export default function Products({ products, title, filter, categories, product,
       color: content.info.textColor
     }}>
       <div className="w-full max-w-[1280px] m-auto flex flex-col gap-4">
-        <h2 ref={titleRef} className={`${titleLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 font-semibold text-xl sm:text-3xl`}>{title}</h2>
+        <H2 ref={titleRef} config={`${titleLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500`} text={title} />
         <div ref={categoriesRef} className={`${categoriesLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500`}>
           <SliderProducts products={productsFilter} style={style} />
         </div>

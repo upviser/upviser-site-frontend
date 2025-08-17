@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useRef, useState } from 'react'
-import { Calendar, H1, H2, P } from '../ui'
+import { Calendar, H1, H2, H3, P } from '../ui'
 import { ICall, IClient, IDesign, IPayment, IService, IStoreData } from '@/interfaces'
 import axios from 'axios'
 import { usePathname } from 'next/navigation'
@@ -179,8 +179,8 @@ export const Call = ({ calls, content, step, services, payment, storeData, index
                 <div ref={titleRef} className={`${title ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500`}>
                   {
                     index === 0
-                      ? <H1 text={content.info.title} color={content.info.textColor} config='text-center font-semibold' />
-                      : <H2 text={content.info.title} color={content.info.textColor} config='text-center font-semibold' />
+                      ? <H1 text={content.info.title} color={content.info.textColor} config='text-center' />
+                      : <H2 text={content.info.title} color={content.info.textColor} config='text-center' />
                   }
                 </div>
               )
@@ -212,7 +212,7 @@ export const Call = ({ calls, content, step, services, payment, storeData, index
                     calls.find(call => call._id === content.meeting)
                       ? (
                         <>
-                          <p className="text-xl font-semibold">{calls.find(call => call._id === content.meeting)?.title}</p>
+                          <H3 text={calls.find(call => call._id === content.meeting)?.title} />
                           <div className="flex gap-2">
                             <svg className="w-5" style={{ color: `${content.info.textColor}80` }} data-id="details-item-icon" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" role="img"><path d="M.5 5a4.5 4.5 0 1 0 9 0 4.5 4.5 0 1 0-9 0Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path><path d="M5 3.269V5l1.759 2.052" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             <p style={{ color: `${content.info.textColor}80` }}>{calls.find(call => call._id === content.meeting)?.duration}</p>

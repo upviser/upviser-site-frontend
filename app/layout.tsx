@@ -12,6 +12,12 @@ const headingFont = localFont({
   variable: '--font-heading',
 })
 
+const otherFont = localFont({
+  src: './fonts/Matter-Regular.ttf',
+  display: 'swap',
+  variable: '--font-other',
+})
+
 const bodyFont = localFont({
   src: './fonts/Matter-Light.ttf',
   display: 'swap',
@@ -43,7 +49,7 @@ export default async function RootLayout({
   const integrations = await fetchIntegrations()
 
   return (
-    <html lang="es" className={`${headingFont.variable} ${bodyFont.variable}`}>
+    <html lang="es" className={`${headingFont.variable} ${otherFont.variable} ${bodyFont.variable}`}>
       <head>
         <link rel="icon" href={process.env.NEXT_PUBLIC_FAVICON} />
       </head>

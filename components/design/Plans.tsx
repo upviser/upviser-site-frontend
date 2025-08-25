@@ -218,8 +218,8 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
                 <div ref={titleRef} className={`${titleLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500`}>
                   {
                     index === 0
-                      ? <H1 text={content.info.title} color={content.info.textColor} config='text-center font-semibold' />
-                      : <H2 text={content.info.title} color={content.info.textColor} config='text-center font-semibold' />
+                      ? <H1 text={content.info.title} color={content.info.textColor} config='text-center' />
+                      : <H2 text={content.info.title} color={content.info.textColor} config='text-center' />
                   }
                 </div>
               )

@@ -210,8 +210,8 @@ export const Lead2 = ({ content, forms, step, index, services, storeData, style 
               <div ref={refTitle} className={`${viewTitle ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500`}>
                 {
                   index === 0
-                    ? <H1 text={content.info.title} color={content.info.textColor} config="text-center font-semibold" />
-                    : <H2 text={content.info.title} color={content.info.textColor} />
+                    ? <H1 text={content.info.title} color={content.info.textColor} config="text-center" />
+                    : <H2 text={content.info.title} color={content.info.textColor} config="text-center" />
                 }
               </div>
             )

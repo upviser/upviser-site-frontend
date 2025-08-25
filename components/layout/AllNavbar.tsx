@@ -425,7 +425,7 @@ export const AllNavbar: React.FC<PropsWithChildren<Props>> = ({ children, design
             </Navbar>
           )
       }
-      <div className='bottom-4 right-4 flex flex-col gap-2 fixed w-14 z-50' style={{ height: design.chatView ? design.instagram ? design.whatsapp ? '180px' : '120px' : design.whatsapp ? '120px' : '60px' : design.instagram ? design.whatsapp ? '120px' : '60px' : '0px' }}>
+      <div className='bottom-4 right-4 flex flex-col gap-2 fixed w-14 z-50' style={{ height: design.chatView ? design.instagram && storeData.instagram && storeData.instagram !== '' ? design.whatsapp && storeData.phone && storeData.phone !== null ? '180px' : '120px' : design.whatsapp && storeData.phone && storeData.phone !== null ? '120px' : '60px' : design.instagram && storeData.instagram && storeData.instagram !== '' ? design.whatsapp && storeData.phone && storeData.phone !== null ? '120px' : '60px' : '0px' }}>
         {
           design.whatsapp && storeData?.phone && storeData.phone !== ''
             ? (

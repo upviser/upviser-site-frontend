@@ -7,7 +7,7 @@ import { GoogleAnalytics } from "@next/third-parties/google"
 import Script from "next/script"
 
 const headingFont = localFont({
-  src: './fonts/Montserrat-VariableFont_wght.ttf',
+  src: './fonts/RedHatDisplay-VariableFont_wght.ttf',
   display: 'swap',
   variable: '--font-heading',
 })

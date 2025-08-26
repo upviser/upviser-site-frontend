@@ -231,10 +231,10 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
                 : ''
             }</div>
             <div className={`${infoLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 flex gap-2`}>
-              <span className='text-[16px] font-medium dark:text-white'>${ liveData.price && liveData.price !== '' ? NumberFormat(Number(liveData.price)) : product?.price ? NumberFormat(product.price) : '' }</span>
+              <span className='text-[16px] font-medium'>${ liveData.price && liveData.price !== '' ? NumberFormat(Number(liveData.price)) : product?.price ? NumberFormat(product.price) : '' }</span>
               {
                 product?.beforePrice || (liveData.beforePrice && liveData.beforePrice !== '')
-                  ? <span className='text-sm line-through dark:text-neutral-400'>${ liveData.beforePrice && liveData.beforePrice !== '' ? NumberFormat(Number(liveData.beforePrice)) : product.beforePrice ? NumberFormat(product?.beforePrice) : '' }</span>
+                  ? <span className='text-sm line-through'>${ liveData.beforePrice && liveData.beforePrice !== '' ? NumberFormat(Number(liveData.beforePrice)) : product.beforePrice ? NumberFormat(product?.beforePrice) : '' }</span>
                   : ''
               }
             </div>
@@ -246,7 +246,7 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
               )
               : ''
           }
-          <span className={`${infoLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 text-[14px] block dark:text-neutral-400`}><span className='font-medium dark:text-white'>Stock:</span> { tempCartProduct.stock ? tempCartProduct.stock : product?.stock } { tempCartProduct.stock ? tempCartProduct.stock === 1 ? 'unidad' : 'unidades' : product?.stock === 1 ? 'unidad' : 'unidades' }</span>
+          <span className={`${infoLoaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 text-[14px] block`}><span className='font-medium'>Stock:</span> { tempCartProduct.stock ? tempCartProduct.stock : product?.stock } { tempCartProduct.stock ? tempCartProduct.stock === 1 ? 'unidad' : 'unidades' : product?.stock === 1 ? 'unidad' : 'unidades' }</span>
           {
             product?.quantityOffers?.length && product?.quantityOffers[0].descount && product.stock !== 0
               ? (
@@ -271,8 +271,8 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
           {
             product?.productsOffer?.length
               ? product.productsOffer[0].productsSale.length
-                ? <div className={`${info2Loaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 border-b pb-4 dark:border-neutral-800`}>
-                  <h5 className='text-[16px] font-medium mb-2 md:text-[18px] dark:text-white'>Ofertas por la compra de este producto</h5>
+                ? <div className={`${info2Loaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 border-b pb-4`}>
+                  <h5 className='text-[16px] font-medium mb-2 md:text-[18px]'>Ofertas por la compra de este producto</h5>
                   {
                     product.productsOffer.map(offer => <ProductOffer key={offer.productsSale[0].slug} offer={offer} />)
                   }
@@ -281,7 +281,7 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
             : ''
           }
           <div ref={inf2Ref} className={`${info2Loaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 flex flex-col gap-4`}>
-          <div ref={reviewRef} className='border-b pb-2 dark:border-neutral-800'>
+          <div ref={reviewRef} className='border-b pb-2'>
             <button onClick={(e: any) => {
               e.preventDefault()
               if (descriptionRotate === '-rotate-90') {
@@ -290,12 +290,12 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
                 setDescriptionRotate('-rotate-90')
               }
             }} className='flex gap-2 w-full justify-between'>
-              <h5 className='text-[16px] font-medium md:text-[18px] dark:text-white'>Descripción</h5>
+              <h5 className='text-[16px] font-medium md:text-[18px]'>Descripción</h5>
               <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" className={`${descriptionRotate} transition-all duration-150 ml-auto text-lg w-4 text-neutral-500`} xmlns="http://www.w3.org/2000/svg"><path d="M765.7 486.8L314.9 134.7A7.97 7.97 0 0 0 302 141v77.3c0 4.9 2.3 9.6 6.1 12.6l360 281.1-360 281.1c-3.9 3-6.1 7.7-6.1 12.6V883c0 6.7 7.7 10.4 12.9 6.3l450.8-352.1a31.96 31.96 0 0 0 0-50.4z"></path></svg>
             </button>
             <div ref={contentRef} style={{ maxHeight: `${descriptionView}px`, overflow: 'hidden', transition: 'max-height 0.3s' }} className={`${descriptionView} transition-all duration-200 flex flex-col gap-2 mt-2`}>
               {product?.description.split('/').map(des => {
-                return <p className='text-[#444444] mb-1 text-sm dark:text-neutral-400 md:text-[16px]' key={des}>{des}</p>
+                return <p className='text-[#444444] mb-1 text-sm md:text-[16px]' key={des}>{des}</p>
               })}
             </div>
           </div>
@@ -303,7 +303,7 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
           {
             design.productPage && design.productPage[0].title !== '' && design.productPage[0].text !== ''
               ? (
-                <div className='border-b pb-2 dark:border-neutral-800'>
+                <div className='border-b pb-2'>
                   <button onClick={(e: any) => {
                     e.preventDefault()
                     if (designRotate === '-rotate-90') {
@@ -312,11 +312,11 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
                       setDesignRotate('-rotate-90')
                     }
                   }} className='flex gap-2 w-full justify-between'>
-                    <h5 className='text-[16px] font-medium md:text-[18px] dark:text-white'>{design.productPage[0].title}</h5>
+                    <h5 className='text-[16px] font-medium md:text-[18px]'>{design.productPage[0].title}</h5>
                     <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" className={`${designRotate} transition-all duration-150 ml-auto text-lg w-4 text-neutral-500`} xmlns="http://www.w3.org/2000/svg"><path d="M765.7 486.8L314.9 134.7A7.97 7.97 0 0 0 302 141v77.3c0 4.9 2.3 9.6 6.1 12.6l360 281.1-360 281.1c-3.9 3-6.1 7.7-6.1 12.6V883c0 6.7 7.7 10.4 12.9 6.3l450.8-352.1a31.96 31.96 0 0 0 0-50.4z"></path></svg>
                   </button>
                   <div ref={designRef} style={{ maxHeight: `${designView}px`, overflow: 'hidden', transition: 'max-height 0.3s' }} className={`${designView} transition-all duration-200 flex flex-col gap-2 mt-2`}>
-                    <p className='text-[#444444] mb-1 text-sm dark:text-neutral-400 md:text-[16px]'>{design.productPage[0].text}</p>
+                    <p className='text-[#444444] mb-1 text-sm md:text-[16px]'>{design.productPage[0].text}</p>
                   </div>
                 </div>
               )

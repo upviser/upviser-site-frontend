@@ -47,7 +47,7 @@ const CartPage = ({ design, products, style, storeData }: { design: Design, prod
                         </Link>
                         <div className='mt-auto mb-auto'>
                           <Link href={`/productos/${product.slug}`}>
-                            <p className='dark:text-white'>{product.name}</p>
+                            <p>{product.name}</p>
                           </Link>
                           <div className='flex gap-2'>
                             {
@@ -57,13 +57,13 @@ const CartPage = ({ design, products, style, storeData }: { design: Design, prod
                             }
                             {
                               product.beforePrice
-                                ? <span className='text-sm line-through dark:text-neutral-400'>${NumberFormat(product.beforePrice * product.quantity)}</span>
+                                ? <span className='text-sm line-through'>${NumberFormat(product.beforePrice * product.quantity)}</span>
                                 : ''
                             }
                           </div>
                           {
                             product.variation
-                              ? <span className='dark:text-neutral-400'>{product.variation.variation}{product.variation.subVariation ? ` / ${product.variation.subVariation}` : ''}{product.variation.subVariation2 ? ` / ${product.variation.subVariation2}` : ''}</span>
+                              ? <span>{product.variation.variation}{product.variation.subVariation ? ` / ${product.variation.subVariation}` : ''}{product.variation.subVariation2 ? ` / ${product.variation.subVariation2}` : ''}</span>
                               : ''
                           }
                         </div>
@@ -83,13 +83,13 @@ const CartPage = ({ design, products, style, storeData }: { design: Design, prod
               cart?.length
                 ? (
                   <div className='w-full xl:w-5/12'>
-                    <div className='p-6 450:p-6 dark:bg-neutral-800 dark:border-neutral-700' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', backgroundColor: design.cartPage.detailsColor }}>
-                      <div className='mb-2 pb-2 border-b dark:border-neutral-700'>
-                        <div className='mb-4 border-b pb-4 dark:border-neutral-700'>
+                    <div className='p-6 450:p-6' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', backgroundColor: design.cartPage.detailsColor }}>
+                      <div className='mb-2 pb-2 border-b'>
+                        <div className='mb-4 border-b pb-4'>
                           <ShippingCart setShippingCost={setShippingCost} style={style} storeData={storeData} />
                         </div>
                         <div className='flex gap-2 justify-between mb-1'>
-                          <span className='text-[14px] dark:text-neutral-400'>Subtotal</span>
+                          <span className='text-[14px]'>Subtotal</span>
                           {
                             cart?.length
                               ? <span className='text-[14px]'>${NumberFormat(cart.reduce((bef, curr) => curr.quantityOffers ? bef + offer(curr) : bef + curr.price * curr.quantity, 0))}</span>
@@ -97,7 +97,7 @@ const CartPage = ({ design, products, style, storeData }: { design: Design, prod
                           }
                         </div>
                         <div className='flex gap-2 justify-between'>
-                          <span className='text-[14px] dark:text-neutral-400'>Envío</span>
+                          <span className='text-[14px]'>Envío</span>
                           <span className='text-[14px]'>${NumberFormat(shippingCost)}</span>
                         </div>
                       </div>

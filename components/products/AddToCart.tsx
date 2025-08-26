@@ -68,7 +68,7 @@ export const AddToCart: React.FC<Props> = ({ product, tempCartProduct, setPopup,
             </div>
           )
           : (
-            <div ref={addButtonRef} className='flex flex-col gap-4 pb-4 border-b w-full dark:border-neutral-800'>
+            <div ref={addButtonRef} className='flex flex-col gap-4 pb-4 border-b w-full'>
               <ItemCounter
                 currentValue={ tempCartProduct.quantity }
                 updatedQuantity={ onUpdateQuantity }

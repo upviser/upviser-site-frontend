@@ -27,7 +27,7 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
               <div className='flex flex-col gap-2'>
                 {
                   shipping.map(item => (
-                    <button className='flex gap-2 justify-between p-2 border dark:border-neutral-700' name='shipping' value={item.serviceDescription} onClick={(e: any) => {
+                    <button className='flex gap-2 justify-between p-2 border' name='shipping' value={item.serviceDescription} onClick={(e: any) => {
                       e.preventDefault()
                       setServiceTypeCode(item.serviceTypeCode)
                       serviceTypeCodeRef.current = item.serviceTypeCode
@@ -63,7 +63,7 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                 {
                   payment.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== ''
                     ? (
-                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='MercadoPago' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                      <button className='flex gap-2 p-2 border' name='pay' value='MercadoPago' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
                         <input type='radio' name='pay' value='MercadoPago' onChange={inputChange} checked={sell.pay === 'MercadoPago'} />
                         <button name='pay' value='MercadoPago' onClick={inputChange} className='text-sm'>Tarjeta de Credito o Debito</button>
                       </button>
@@ -73,7 +73,7 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                 {
                   payment.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== ''
                     ? (
-                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='WebPay Plus' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                      <button className='flex gap-2 p-2 border' name='pay' value='WebPay Plus' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
                         <input type='radio' name='pay' value='WebPay Plus' onChange={inputChange} checked={sell.pay === 'WebPay Plus'} />
                         <button name='pay' value='WebPay Plus' onClick={inputChange} className='text-sm'>WebPay Plus</button>
                       </button>
@@ -83,7 +83,7 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                 {
                   payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''
                     ? (
-                      <button className='flex gap-2 p-2 border dark:border-neutral-700' name='pay' value='MercadoPagoPro' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                      <button className='flex gap-2 p-2 border' name='pay' value='MercadoPagoPro' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
                         <input type='radio' name='pay' value='MercadoPagoPro' onChange={inputChange} checked={sell.pay === 'MercadoPagoPro'} />
                         <button name='pay' value='MercadoPagoPro' onClick={inputChange} className='text-sm'>MercadoPago</button>
                       </button>

@@ -90,7 +90,7 @@ export const AccountLogin: React.FC<Props> = ({ account, setAccount, setAccountP
   }
 
   return (
-    <div onMouseEnter={() => setAccountPc(false)} onMouseLeave={() => setAccountPc(true)} className={`ml-auto flex flex-col gap-3 p-4 bg-white z-40 w-full dark:bg-neutral-900 dark:border-neutral-800 sm:w-96`} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '' }}>
+    <div onMouseEnter={() => setAccountPc(false)} onMouseLeave={() => setAccountPc(true)} className={`ml-auto flex flex-col gap-3 p-4 bg-white z-40 w-full sm:w-96`} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '' }}>
       {
         error !== ''
           ? (
@@ -110,7 +110,7 @@ export const AccountLogin: React.FC<Props> = ({ account, setAccount, setAccountP
                 setTimeout(() => {
                   setAccountView('hidden')
                 }, 500)
-              }} className='p-1.5 hover:bg-neutral-100 rounded-md transition-colors duration-100 dark:hover:bg-neutral-800'>Ver mi cuenta</Link>
+              }} className='p-1.5 hover:bg-neutral-100 rounded-md transition-colors duration-100'>Ver mi cuenta</Link>
               <Button action={handleLogout} style={style} loading={closeLoading} config='w-full'>Cerrar sesion</Button>
             </>
           )
@@ -120,11 +120,11 @@ export const AccountLogin: React.FC<Props> = ({ account, setAccount, setAccountP
                 <button onClick={(e: any) => {
                   e.preventDefault()
                   setAccount('Ingresar')
-                }} className={`${account === 'Ingresar' ? 'border-neutral-700' : 'border-white dark:border-neutral-900'} border-b-2 w-1/2 h-10 text-sm lg:text-[16px]`}>Ingresar</button>
+                }} className={`${account === 'Ingresar' ? 'border-neutral-700' : 'border-white'} border-b-2 w-1/2 h-10 text-sm lg:text-[16px]`}>Ingresar</button>
                 <button onClick={(e: any) => {
                   e.preventDefault()
                   setAccount('Registrarse')
-                }} className={`${account === 'Registrarse' ? 'border-neutral-700' : 'border-white dark:border-neutral-900'} border-b-2 w-1/2 h-10 text-sm lg:text-[16px]`}>Registrarse</button>
+                }} className={`${account === 'Registrarse' ? 'border-neutral-700' : 'border-white'} border-b-2 w-1/2 h-10 text-sm lg:text-[16px]`}>Registrarse</button>
               </div>
               {
                 account === 'Ingresar'

@@ -49,7 +49,7 @@ export default function Products({ products, style, content }: { products: IProd
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.1 }
     );
 
     if (categoriesRef.current) {

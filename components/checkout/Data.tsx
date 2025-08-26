@@ -32,7 +32,7 @@ export const Data: React.FC<Props> = ({ status, sell, setContactView, setContact
             <>
               <div className='flex flex-col gap-2 w-full'>
                 <h2 className='font-semibold text-xl sm:text-3xl'>Información de contacto</h2>
-                <div className='p-4 flex gap-2 justify-between dark:bg-neutral-800' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', backgroundColor: design.checkoutPage.detailsColor }}>
+                <div className='p-4 flex gap-2 justify-between' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', backgroundColor: design.checkoutPage.detailsColor }}>
                   <div className='flex flex-col gap-2'>
                     <p>Nombre: {sell?.firstName ? sell.firstName : 'Se necesita ingresar un nombre'}</p>
                     <p>Apellido: {sell?.lastName ? sell.lastName : 'Se necesita ingresar un apellido'}</p>
@@ -50,7 +50,7 @@ export const Data: React.FC<Props> = ({ status, sell, setContactView, setContact
               </div>
               <div className='flex flex-col gap-2 w-full'>
                 <h2 className='font-semibold text-xl sm:text-3xl'>Dirección de envío</h2>
-                <div className='bg-neutral-100 p-4 flex gap-2 justify-between dark:bg-neutral-800' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', backgroundColor: design.checkoutPage.detailsColor }}>
+                <div className='bg-neutral-100 p-4 flex gap-2 justify-between' style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', backgroundColor: design.checkoutPage.detailsColor }}>
                   <div className='flex flex-col gap-2'>
                     <p>Dirección: {sell?.address ? sell.address : 'Se nececita una dirección'}</p>
                     <p>Detalles: {sell?.details ? sell.details : '-'}</p>
@@ -114,7 +114,7 @@ export const Data: React.FC<Props> = ({ status, sell, setContactView, setContact
                         <div className='flex gap-2 flex-wrap'>
                           {
                             streets.map((street: any) => (
-                              <button key={street.streetName} className='flex gap-2 p-2 border dark:border-neutral-700' onClick={(e: any) => {
+                              <button key={street.streetName} className='flex gap-2 p-2 border' onClick={(e: any) => {
                                 e.preventDefault()
                                 setDest({ ...dest, streetName: street.streetName })
                               }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>

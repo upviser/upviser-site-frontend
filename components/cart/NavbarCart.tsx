@@ -26,7 +26,7 @@ export const NavbarCart: React.FC<Props> = ({ setCartView, setCartPc, setCartPos
   const user = session?.user as { firstName: string, lastName: string, email: string, _id: string, cart: ICartProduct[] }
 
   return (
-    <div ref={cartRef} onMouseEnter={() => setCartPc(false)} onMouseLeave={() => setCartPc(true)} onMouseMove={() => setCartPc(true)} className={`ml-auto flex flex-col gap-3 p-4 shadow-md bg-white z-40 dark:bg-neutral-900 dark:border dark:border-neutral-800 w-[360px]`} style={{ height: 'calc(100vh - 49px)' }}>
+    <div ref={cartRef} onMouseEnter={() => setCartPc(false)} onMouseLeave={() => setCartPc(true)} onMouseMove={() => setCartPc(true)} className={`ml-auto flex flex-col gap-3 p-4 shadow-md bg-white z-40 w-[360px]`} style={{ height: 'calc(100vh - 49px)' }}>
       <H3 config='border-b text-center pb-2 font-medium' text='Carrito' />
       {
         cart?.length

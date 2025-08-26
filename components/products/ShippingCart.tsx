@@ -111,29 +111,29 @@ export const ShippingCart: React.FC<Props> = ({ setShippingCost, style, storeDat
         ? (
           <div className='flex flex-col gap-4'>
             <div className='flex flex-col gap-2'>
-              <span className='dark:text-white'>Envíos express:</span>
+              <span>Envíos express:</span>
               {FreeShipping.map(cityFree => {
                 if (cityFree === city) {
-                  return <div className='flex justify-between p-2 border rounded dark:border-neutral-500' key={cityFree}>
+                  return <div className='flex justify-between p-2 border rounded' key={cityFree}>
                     <div className='flex gap-2'>
                       <input type='radio' name='shipping' className='envio express' value={0} onChange={inputChange} />
-                      <span className='text-sm text-[#444444] dark:text-neutral-400'>Envío gratis en 24 a 48 horas</span>
+                      <span className='text-sm text-[#444444]'>Envío gratis en 24 a 48 horas</span>
                     </div>
-                    <span className='text-sm text-[#444444] dark:text-neutral-400'>$0</span>
+                    <span className='text-sm text-[#444444]'>$0</span>
                   </div>
                 }
                 return null
               })}
             </div>
             <div className='flex flex-col gap-2'>
-              <span className='mt-1 dark:text-white'>Chilexpress:</span>
+              <span className='mt-1'>Chilexpress:</span>
               {shipping.map(service => (
-                <div key={service.serviceDescription} className='flex justify-between p-2 border rounded dark:border-neutral-500'>
+                <div key={service.serviceDescription} className='flex justify-between p-2 border rounded'>
                   <div className='flex gap-2'>
                     <input type='radio' name='shipping' className={service.serviceDescription} value={service.serviceValue} onChange={inputChange} />
-                    <span className='text-sm text-[#444444] dark:text-neutral-400'>{service.serviceDescription}</span>
+                    <span className='text-sm text-[#444444]'>{service.serviceDescription}</span>
                   </div>
-                  <span className='text-sm text-[#444444] dark:text-neutral-400'>${NumberFormat(Number(service.serviceValue))}</span>
+                  <span className='text-sm text-[#444444]'>${NumberFormat(Number(service.serviceValue))}</span>
                 </div>
               ))}
             </div>

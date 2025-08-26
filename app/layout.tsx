@@ -7,21 +7,9 @@ import { GoogleAnalytics } from "@next/third-parties/google"
 import Script from "next/script"
 
 const headingFont = localFont({
-  src: './fonts/CalSans-Regular.woff2',
+  src: './fonts/Montserrat-VariableFont_wght.ttf',
   display: 'swap',
   variable: '--font-heading',
-})
-
-const otherFont = localFont({
-  src: './fonts/Matter-Regular.ttf',
-  display: 'swap',
-  variable: '--font-other',
-})
-
-const bodyFont = localFont({
-  src: './fonts/Matter-Light.ttf',
-  display: 'swap',
-  variable: '--font-body',
 })
 
 
@@ -49,7 +37,7 @@ export default async function RootLayout({
   const integrations = await fetchIntegrations()
 
   return (
-    <html lang="es" className={`${headingFont.variable} ${otherFont.variable} ${bodyFont.variable}`}>
+    <html lang="es" className={`${headingFont.variable}`}>
       <head>
         <link rel="icon" href={process.env.NEXT_PUBLIC_FAVICON} />
       </head>

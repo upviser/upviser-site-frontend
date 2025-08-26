@@ -43,7 +43,7 @@ export const SubscribePage = ({ info, style }: { info: IInfo, style?: any }) => 
   }
 
   return (
-    <div className='w-full min-h-[230px] bg-neutral-100 pl-4 pr-4 flex dark:bg-neutral-900/40' style={{ background: `${info.typeBackground === 'Degradado' ? info.background : info.typeBackground === 'Color' ? info.background : ''}` }}>
+    <div className='w-full min-h-[230px] bg-neutral-100 pl-4 pr-4 flex' style={{ background: `${info.typeBackground === 'Degradado' ? info.background : info.typeBackground === 'Color' ? info.background : ''}` }}>
       <form className='w-[1280px] m-auto flex flex-col gap-4'>
         {
           error !== ''

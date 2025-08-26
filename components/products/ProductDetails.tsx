@@ -58,7 +58,7 @@ export const ProductDetails: React.FC<Props> = ({ product, tempCartProduct, setT
   }
 
   return (
-      <div className='m-auto p-4 block bg-white gap-2 w-full border-t justify-around dark:bg-neutral-900 dark:border dark:border-neutral-800 sm:flex'>
+      <div className='m-auto p-4 block bg-white gap-2 w-full border-t justify-around sm:flex'>
         <div className='flex mb-2 justify-around gap-2 sm:mb-0'>
           <Image className='w-20 h-20 mt-auto mb-auto' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }} src={ tempCartProduct.image && tempCartProduct.image !== '' ? tempCartProduct.image : product?.images[0]} alt={product.name} width={80} height={80} />
           <div className='mt-auto mb-auto'>

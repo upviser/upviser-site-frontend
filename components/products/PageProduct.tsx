@@ -102,7 +102,7 @@ export default function PageProduct ({ product, design, products, categories, st
             <div className='flex p-4'>
               <div className='w-[1280px] m-auto'>
                 <H2 text="Evaluaciones de clientes" />
-                <span className='text-[14px] md:text-[16px] dark:text-neutral-400'>Valoracion media</span>
+                <span className='text-[14px] md:text-[16px]'>Valoracion media</span>
                 <div className='mt-2'>
                   {
                     product?.reviews?.length

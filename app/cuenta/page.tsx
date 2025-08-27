@@ -84,7 +84,7 @@ export default function Page () {
           <p className="font-medium">Productos</p>
           {
             sell?.cart.map(product => (
-              <div className="flex gap-2 justify-between">
+              <div key={product._id} className="flex gap-2 justify-between">
                 <div className="flex gap-2">
                   <Image src={product.image!} className="rounded" alt={""} width={100} height={100} />
                   <div className="my-auto flex flex-col gap-2">

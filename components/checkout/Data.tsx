@@ -98,8 +98,8 @@ export const Data: React.FC<Props> = ({ status, sell, setContactView, setContact
                   <Input inputChange={inputChange} value={sell.address} type={'text'} placeholder={'Dirección'} name='address' text='text-sm' style={style} />
                 </div>
                 <div className='flex flex-col gap-2'>
-                  <p className='text-sm'>Numero</p>
-                  <Input inputChange={inputChange} value={sell.number} type={'text'} placeholder={'Numero'} name='number' text='text-sm' style={style} />
+                  <p className='text-sm'>Número</p>
+                  <Input inputChange={inputChange} value={sell.number} type={'text'} placeholder={'Número'} name='number' text='text-sm' style={style} />
                 </div>
                 <div className='flex flex-col gap-2'>
                   <p className='text-sm'>Detalles (Opcional)</p>

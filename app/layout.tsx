@@ -6,10 +6,9 @@ import MainLayout from "@/components/layout/MainLayout"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import Script from "next/script"
 
-const headingFont = localFont({
+const myFont = localFont({
   src: './fonts/RedHatDisplay-VariableFont_wght.ttf',
   display: 'swap',
-  variable: '--font-heading',
 })
 
 
@@ -37,7 +36,7 @@ export default async function RootLayout({
   const integrations = await fetchIntegrations()
 
   return (
-    <html lang="es" className={`${headingFont.variable}`}>
+    <html lang="es" className={`${myFont.className}`}>
       <head>
         <link rel="icon" href={process.env.NEXT_PUBLIC_FAVICON} />
       </head>

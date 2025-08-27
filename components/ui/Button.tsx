@@ -12,6 +12,6 @@ interface Props {
 
 export const Button: React.FC<PropsWithChildren<Props>> = ({ children, action, config, type, loading, style, width }) => {
   return (
-    <button type={type ? type : 'button'} onClick={action} className={`${config} ${loading !== undefined ? loading ? `cursor-not-allowed` : `` : ``} h-10 w-fit transition-colors duration-300 font-medium`} style={{ backgroundColor: style?.primary, color: style?.button, borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '', width: width && width !== '' ? `${width}px` : '', paddingLeft: width && width !== '' ? '' : '24px', paddingRight: width && width !== '' ? '' : '24px' }}>{ loading !== undefined ? loading ? <Spinner2 /> : children : children }</button>
+    <button type={type ? type : 'button'} onClick={action} className={`${config} ${loading !== undefined ? loading ? `cursor-not-allowed` : `` : ``} h-10 w-fit transition-colors duration-300`} style={{ backgroundColor: style?.primary, color: style?.button, borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '', width: width && width !== '' ? `${width}px` : '', paddingLeft: width && width !== '' ? '' : '24px', paddingRight: width && width !== '' ? '' : '24px' }}>{ loading !== undefined ? loading ? <Spinner2 /> : children : children }</button>
   )
 }

@@ -407,18 +407,18 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
             <>
               <div className='flex flex-col gap-6'>
                 <div className="flex gap-6 items-center m-auto">
-                  <button onClick={() => handleChangeMonth(-1)} className="text-gray-600 hover:text-gray-800">&lt;</button>
+                  <button onClick={() => handleChangeMonth(-1)} className="text-gray-600 text-xl hover:text-gray-800">&lt;</button>
                   <p className="text-lg font-semibold">{date.toLocaleString('default', { month: 'long' })} {date.getFullYear()}</p>
-                  <button onClick={() => handleChangeMonth(1)} className="text-gray-600 hover:text-gray-800">&gt;</button>
+                  <button onClick={() => handleChangeMonth(1)} className="text-gray-600 text-xl hover:text-gray-800">&gt;</button>
                 </div>
                 <div className="grid grid-cols-7 gap-2">
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Dom</div>
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Lun</div>
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Mar</div>
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Mié</div>
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Jue</div>
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Vie</div>
-                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}80` }}>Sáb</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Dom</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Lun</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Mar</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Mié</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Jue</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Vie</div>
+                  <div className="text-center font-semibold" style={{ color: `${content?.info.textColor}90` }}>Sáb</div>
                   {renderCalendar()}
                 </div>
               </div>
@@ -438,8 +438,8 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
                             <button
                               key={hour}
                               onClick={() => handleHourSelect(hour.toString())}
-                              className={`p-2 rounded-xl text-center transition-colors duration-200`}
-                              style={{ backgroundColor: isTimeSelected(hour.toString()) ? style.primary : `${content?.info.textColor && content.info.textColor !== '' ? content.info.textColor : '#111111'}20`, color: isTimeSelected(hour.toString()) ? style.button : '' }}
+                              className={`p-2 text-center transition-colors duration-200`}
+                              style={{ backgroundColor: isTimeSelected(hour.toString()) ? style.primary : `${content?.info.textColor && content.info.textColor !== '' ? content.info.textColor : '#111111'}15`, color: isTimeSelected(hour.toString()) ? style.button : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}
                             >
                               {hour}
                             </button>
@@ -765,8 +765,8 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
         <button 
           key={i} 
           disabled={!isAvailable} 
-          className={`w-10 h-10 sm:w-12 sm:h-12 m-auto flex rounded-full transition-color duration-150`}
-          style={{ backgroundColor: isAvailable ? (isSelected ? style.primary : content?.info.textColor && content.info.textColor !== '' ? `${content.info.textColor}20` : '#11111120') : '', color: isAvailable ? (isSelected ? style.button : `${content?.info.textColor}`) : `${content?.info.textColor}50` }}
+          className={`w-10 h-10 sm:w-12 sm:h-12 m-auto flex transition-color duration-150`}
+          style={{ backgroundColor: isAvailable ? (isSelected ? style.primary : content?.info.textColor && content.info.textColor !== '' ? `${content.info.textColor}15` : '#11111120') : '', color: isAvailable ? (isSelected ? style.button : `${content?.info.textColor}`) : `${content?.info.textColor}70`, borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}
           onClick={() => handleDateTimeSelect(currentDate)}
         >
           <p className='m-auto'>{i}</p>

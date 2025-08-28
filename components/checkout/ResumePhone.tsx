@@ -91,7 +91,7 @@ export const ResumePhone = ({ cart, sell, style, design, setSell, coupon, setCou
         <div className='mt-2 mb-2 pb-2 border-b'>
           <div className='flex gap-2 justify-between mb-1'>
             <span className='text-[14px]'>Subtotal</span>
-            <span className='text-[14px]'>${NumberFormat(sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0))}</span>
+            <span className='text-[14px]'>${NumberFormat(sell.total - sell.shipping)}</span>
           </div>
           <div className='flex gap-2 justify-between'>
             <span className='text-[14px]'>Envío</span>
@@ -101,7 +101,7 @@ export const ResumePhone = ({ cart, sell, style, design, setSell, coupon, setCou
       </div>
       <div className='flex gap-2 justify-between'>
         <span className='font-medium'>Total</span>
-        <span className='font-medium'>${NumberFormat(sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping))}</span>
+        <span className='font-medium'>${NumberFormat(sell.total)}</span>
       </div>
     </div>
   )

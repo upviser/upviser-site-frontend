@@ -52,20 +52,22 @@ export const Resume = ({ cart, sell, style, design, setSell, coupon, setCoupon, 
           }} value={sell.coupon} type={'text'} placeholder={'Cupon'} text='text-sm' style={style} />
           <Button action={async (e: any) => {
             if (!loading) {
+              setLoading(true)
               const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/promotional-code`)
               const coupon = res.data.find((code: any) => code.promotionalCode.toLowerCase() === sell.coupon?.toLowerCase())
               setCoupon(coupon)
               if (coupon.discountType === 'Porcentaje') {
-                if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
-                  setSell({ ...sell, total: (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + sell.shipping })
-                  sellRef.current = { ...sell, total: (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + sell.shipping }
+                if (coupon.minimumAmount < sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) || !coupon.minimumAmount) {
+                  setSell({ ...sell, total: ((sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) / 100) * (100 - coupon.value)) + sell.shipping })
+                  sellRef.current = { ...sell, total: ((sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) / 100) * (100 - coupon.value)) + sell.shipping }
                 }
               } else if (coupon.discountType === 'Valor') {
-                if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
-                  setSell({ ...sell, total: sell.total - coupon.value })
-                  sellRef.current = { ...sell, total: sell.total - coupon.value }
+                if (coupon.minimumAmount < sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) || !coupon.minimumAmount) {
+                  setSell({ ...sell, total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + sell.shipping - coupon.value })
+                  sellRef.current = { ...sell, total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + sell.shipping - coupon.value }
                 }
               }
+              setLoading(false)
             }
           }} style={style} loading={loading}>Agregar</Button>
         </div>
@@ -73,7 +75,7 @@ export const Resume = ({ cart, sell, style, design, setSell, coupon, setCoupon, 
       <div className='mb-2 pb-2 border-b'>
         <div className='flex gap-2 justify-between mb-1'>
           <span className='text-[14px]'>Subtotal</span>
-          <span className='text-[14px]'>${NumberFormat(sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0))}</span>
+          <span className='text-[14px]'>${NumberFormat(sell.total - sell.shipping)}</span>
         </div>
         <div className='flex gap-2 justify-between'>
           <span className='text-[14px]'>Envío</span>
@@ -82,7 +84,7 @@ export const Resume = ({ cart, sell, style, design, setSell, coupon, setCoupon, 
       </div>
       <div className='flex gap-2 justify-between'>
         <span className='font-medium'>Total</span>
-        <span className='font-medium'>${NumberFormat(sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(sell.shipping))}</span>
+        <span className='font-medium'>${NumberFormat(sell.total)}</span>
       </div>
     </div>
   )

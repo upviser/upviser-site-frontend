@@ -34,12 +34,12 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                       serviceTypeCodeRef.current = item.serviceTypeCode
                       let total
                       if (coupon.discountType === 'Porcentaje') {
-                        if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
-                          total = (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + item.serviceValue
+                        if (coupon.minimumAmount < sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) || !coupon.minimumAmount) {
+                          total = ((sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) / 100) * (100 - coupon.value)) + item.serviceValue
                         }
                       } else if (coupon.discountType === 'Valor') {
-                        if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
-                          total = sell.total - sell.shipping - coupon.value + item.serviceValue
+                        if (coupon.minimumAmount < sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) || !coupon.minimumAmount) {
+                          total = sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) - coupon.value + item.serviceValue
                         }
                       }
                       setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total })

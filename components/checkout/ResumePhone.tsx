@@ -4,11 +4,13 @@ import { Button, Button2, H2, Input } from '../ui'
 import Image from 'next/image'
 import { NumberFormat, offer } from '@/utils'
 import { ICartProduct, ISell } from '@/interfaces'
+import axios from 'axios'
 
-export const ResumePhone = ({ cart, sell, style, design }: { cart: ICartProduct[] | undefined, sell: ISell, style?: any, design: any }) => {
+export const ResumePhone = ({ cart, sell, style, design, setSell, coupon, setCoupon, sellRef }: { cart: ICartProduct[] | undefined, sell: ISell, style?: any, design: any, setSell: any, coupon: any, setCoupon: any, sellRef: any }) => {
 
   const [details, setDetails] = useState(0)
   const [rotate, setRotate] = useState('rotate-90')
+  const [loading, setLoading] = useState(false)
 
   const detailsRef = useRef<HTMLDivElement>(null)
 
@@ -62,8 +64,28 @@ export const ResumePhone = ({ cart, sell, style, design }: { cart: ICartProduct[
         <div className='pb-3 border-b flex flex-col gap-2'>
           <H2 text='Cupon de descuento' />
           <div className='flex gap-2'>
-            <Input inputChange={undefined} value={undefined} type={'text'} placeholder={'Cupon'} style={style} />
-            <Button style={style}>Agregar</Button>
+            <Input inputChange={(e: any) => {
+              setSell({ ...sell, coupon: e.target.value })
+              sellRef.current = { ...sell, coupon: e.target.value }
+            }} value={sell.coupon} type={'text'} placeholder={'Cupon'} style={style} />
+            <Button action={async (e: any) => {
+              if (!loading) {
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/promotional-code`)
+                const coupon = res.data.find((code: any) => code.promotionalCode.toLowerCase() === sell.coupon?.toLowerCase())
+                setCoupon(coupon)
+                if (coupon.discountType === 'Porcentaje') {
+                  if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                    setSell({ ...sell, total: (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + sell.shipping })
+                    sellRef.current = { ...sell, total: (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + sell.shipping }
+                  }
+                } else if (coupon.discountType === 'Valor') {
+                  if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                    setSell({ ...sell, total: sell.total - coupon.value })
+                    sellRef.current = { ...sell, total: sell.total - coupon.value }
+                  }
+                }
+              }
+            }} style={style} loading={loading}>Agregar</Button>
           </div>
         </div>
         <div className='mt-2 mb-2 pb-2 border-b'>

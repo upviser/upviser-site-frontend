@@ -14,9 +14,10 @@ interface Props {
     initializationRef: any
     setServiceTypeCode?: any
     serviceTypeCodeRef?: any
+    coupon: any
 }
 
-export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef, setServiceTypeCode, serviceTypeCodeRef }) => {
+export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef, setServiceTypeCode, serviceTypeCodeRef, coupon }) => {
   return (
     <>
       {
@@ -31,17 +32,37 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                       e.preventDefault()
                       setServiceTypeCode(item.serviceTypeCode)
                       serviceTypeCodeRef.current = item.serviceTypeCode
-                      setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) })
-                      sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
-                      initializationRef.current = { amount: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
+                      let total
+                      if (coupon.discountType === 'Porcentaje') {
+                        if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                          total = (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + item.serviceValue
+                        }
+                      } else if (coupon.discountType === 'Valor') {
+                        if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                          total = sell.total - sell.shipping - coupon.value + item.serviceValue
+                        }
+                      }
+                      setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total })
+                      sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total }
+                      initializationRef.current = { amount: total }
                     }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} key={item.serviceTypeCode}>
                       <div className='flex gap-2'>
                         <input type='radio' onChange={() => {
                           setServiceTypeCode(item.serviceTypeCode)
                           serviceTypeCodeRef.current = item.serviceTypeCode
-                          setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) })
-                          sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
-                          initializationRef.current = { amount: sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) + Number(item.serviceValue) }
+                          let total
+                          if (coupon.discountType === 'Porcentaje') {
+                            if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                              total = (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + item.serviceValue
+                            }
+                          } else if (coupon.discountType === 'Valor') {
+                            if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                              total = sell.total - sell.shipping - coupon.value + item.serviceValue
+                            }
+                          }
+                          setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total })
+                          sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total }
+                          initializationRef.current = { amount: total }
                         }} checked={sell.shippingMethod === item.serviceDescription} />
                         <p className='text-sm mt-auto mb-auto'>{item.serviceDescription}</p>
                       </div>

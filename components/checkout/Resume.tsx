@@ -1,10 +1,15 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 import { Button, Button2, H2, Input } from '../ui'
 import Image from 'next/image'
 import { NumberFormat, offer } from '@/utils'
 import { Design, ICartProduct, ISell } from '@/interfaces'
+import axios from 'axios'
 
-export const Resume = ({ cart, sell, style, design }: { cart: ICartProduct[] | undefined, sell: ISell, style: any, design: Design }) => {
+export const Resume = ({ cart, sell, style, design, setSell, coupon, setCoupon, sellRef }: { cart: ICartProduct[] | undefined, sell: ISell, style: any, design: Design, setSell: any, coupon: any, setCoupon: any, sellRef: any }) => {
+  
+  const [loading, setLoading] = useState(false)
+  
   return (
     <div className='w-5/12 h-fit p-6 hidden sticky top-28 bg-gray-50 xl:block' style={{ borderRadius: style?.form === 'Redondeadas' ? `${style?.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', backgroundColor: design.checkoutPage.detailsColor }}>
       <div className='mb-2 flex flex-col gap-2 pb-2 border-b'>
@@ -41,8 +46,28 @@ export const Resume = ({ cart, sell, style, design }: { cart: ICartProduct[] | u
       <div className='mb-2 flex flex-col gap-2 pb-3 border-b'>
         <h2 className='font-medium text-xl sm:text-3xl'>Cupon de descuento</h2>
         <div className='flex gap-2'>
-          <Input inputChange={undefined} value={undefined} type={'text'} placeholder={'Cupon'} text='text-sm' style={style} />
-          <Button style={style}>Agregar</Button>
+          <Input inputChange={(e: any) => {
+            setSell({ ...sell, coupon: e.target.value })
+            sellRef.current = { ...sell, coupon: e.target.value }
+          }} value={sell.coupon} type={'text'} placeholder={'Cupon'} text='text-sm' style={style} />
+          <Button action={async (e: any) => {
+            if (!loading) {
+              const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/promotional-code`)
+              const coupon = res.data.find((code: any) => code.promotionalCode.toLowerCase() === sell.coupon?.toLowerCase())
+              setCoupon(coupon)
+              if (coupon.discountType === 'Porcentaje') {
+                if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                  setSell({ ...sell, total: (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + sell.shipping })
+                  sellRef.current = { ...sell, total: (((sell.total - sell.shipping) / 100) * (100 - coupon.value)) + sell.shipping }
+                }
+              } else if (coupon.discountType === 'Valor') {
+                if (coupon.minimumAmount < (sell.total - sell.shipping) || !coupon.minimumAmount) {
+                  setSell({ ...sell, total: sell.total - coupon.value })
+                  sellRef.current = { ...sell, total: sell.total - coupon.value }
+                }
+              }
+            }
+          }} style={style} loading={loading}>Agregar</Button>
         </div>
       </div>
       <div className='mb-2 pb-2 border-b'>

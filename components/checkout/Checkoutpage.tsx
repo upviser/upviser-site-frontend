@@ -61,6 +61,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   const [dest, setDest] = useState({ countyCoverageCode: '', streetName: '', serviceDeliveryCode: '' })
   const [streets, setStreets] = useState([])
   const [serviceTypeCode, setServiceTypeCode] = useState()
+  const [coupon, setCoupon] = useState()
 
   const sellRef = useRef(sell)
   const initializationRef = useRef({ amount: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) })
@@ -214,7 +215,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
             <div style={{ backgroundColor: design.checkoutPage.bgColor, color: design.checkoutPage.textColor }}>
               <EditData contactMouse={contactMouse} setContactOpacity={setContactOpacity} setContactView={setContactView} contactView={contactView} contactOpacity={contactOpacity} setContactMouse={setContactMouse} inputChange={inputChange} sell={sell} style={style} />
               <EditShipping shippingMouse={shippingMouse} setShippingOpacity={setShippingOpacity} setShippingView={setShippingView} shippingView={shippingView} shippingOpacity={shippingOpacity} setShippingMouse={setShippingMouse} sell={sell} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} sellRef={sellRef} />
-              <ResumePhone cart={cart} sell={sell} style={style} design={design} />
+              <ResumePhone cart={cart} sell={sell} style={style} design={design} setSell={setSell} coupon={coupon} setCoupon={setCoupon} sellRef={sellRef} />
               <div className='mt-28 flex p-4 xl:mt-0'>
                 <form className='w-[1280px] m-auto block xl:flex' id='formBuy'>
                   <div className='w-full flex flex-col gap-6 pr-0 xl:w-7/12 xl:pr-8'>
@@ -238,7 +239,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
                             <>
                               <h1 className="font-medium text-2xl sm:text-4xl">Finalizar compra</h1>
                               <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} dest={dest} setDest={setDest} streets={streets} setStreets={setStreets} />
-                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} setServiceTypeCode={setServiceTypeCode} serviceTypeCodeRef={serviceTypeCodeRef} />
+                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} setServiceTypeCode={setServiceTypeCode} serviceTypeCodeRef={serviceTypeCodeRef} coupon={coupon} />
                               {
                                 status === 'authenticated'
                                   ? ''
@@ -262,7 +263,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
                           )
                     }
                   </div>
-                  <Resume cart={cart} sell={sell} style={style} design={design} />
+                  <Resume cart={cart} sell={sell} style={style} design={design} setSell={setSell} coupon={coupon} setCoupon={setCoupon} sellRef={sellRef} />
                 </form>
               </div>
             </div>

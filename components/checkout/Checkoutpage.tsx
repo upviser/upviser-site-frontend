@@ -75,6 +75,11 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
 
   const router = useRouter()
 
+  useEffect(() => {
+    setSell({ ...sell, cart: cart!, total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) })
+    sellRef.current = { ...sell, cart: cart!, total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) }
+  }, [cart])
+
   const getClientData = async () => {
     if (status === 'authenticated') {
       const resp = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/chilexpress`)

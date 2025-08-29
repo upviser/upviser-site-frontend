@@ -16,14 +16,34 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const user = session?.user as { firstName: string, lastName: string, email: string, _id: string, cart: ICartProduct[] }
 
   const getCart = async () => {
-    if (status === 'authenticated') {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/account/${user._id}`)
-      if (response.data.cart) {
-        setCart(response.data.cart)
+    const currentUrl = window.location.href
+    const url = new URL(currentUrl)
+    const params = new URLSearchParams(url.search)
+    const number = params.get('number')
+    const messengerId = params.get('messengerId');
+    const instagramId = params.get('instagramId');
+    if (number || messengerId || instagramId) {
+      if (number) {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${number}`)
+        setCart(res.data.cart.cart)
+      } else if (messengerId) {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${messengerId}`)
+        setCart(res.data.cart.cart)
+      } else if (instagramId) {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${instagramId}`)
+        setCart(res.data.cart.cart)
       }
     } else {
-      if (localStorage.getItem('cart')) {
-        setCart(JSON.parse(localStorage.getItem('cart')!))
+      if (status === 'authenticated') {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/account/${user._id}`)
+        if (response.data.cart) {
+          localStorage.setItem('cart', JSON.stringify(response.data.cart))
+          setCart(response.data.cart)
+        }
+      } else {
+        if (localStorage.getItem('cart')) {
+          setCart(JSON.parse(localStorage.getItem('cart')!))
+        }
       }
     }
   }

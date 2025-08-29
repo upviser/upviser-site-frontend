@@ -78,6 +78,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
   useEffect(() => {
     setSell({ ...sell, cart: cart!, total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) })
     sellRef.current = { ...sell, cart: cart!, total: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) }
+    initializationRef.current = { amount: cart?.reduce((bef: any, curr: any) => bef + curr.price * curr.quantity, 0) }
   }, [cart])
 
   const getClientData = async () => {

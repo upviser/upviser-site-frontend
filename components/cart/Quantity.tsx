@@ -57,14 +57,22 @@ export const Quantity = ({ product, style }: { product: ICartProduct, style: any
                 const cartProduct: ICartProduct[] = JSON.parse(localStorage.getItem('cart')!)
                 const productSelect = cartProduct.filter((item: ICartProduct) => item.name === product.name)
                 if (productSelect.length >= 2) {
-                  const products = cartProduct.filter(item => item.variation?.variation !== product.variation?.variation || item.variation?.subVariation !== product.variation?.subVariation || item.variation?.subVariation2 !== product.variation?.subVariation2)
+                  let products
+                  products = cartProduct.filter(item => item.variation?.variation !== product.variation?.variation || item.variation?.subVariation !== product.variation?.subVariation || item.variation?.subVariation2 !== product.variation?.subVariation2)
+                  if (!products.find(prod => prod._id === product._id)) {
+                    products = products.filter(prod => prod.idProduct !== product._id)
+                  }
                   localStorage.setItem('cart', JSON.stringify(products))
                   setCart(products)
                   if (status === 'authenticated') {
                     await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/account/${user._id}`, { cart: JSON.parse(localStorage.getItem('cart')!) })
                   }
                 } else {
-                  const products = cartProduct.filter(item => item.name !== product.name)
+                  let products
+                  products = cartProduct.filter(item => item.name !== product.name)
+                  if (!products.find(prod => prod._id === product._id)) {
+                    products = products.filter(prod => prod.idProduct !== product._id)
+                  }
                   localStorage.setItem('cart', JSON.stringify(products))
                   setCart(products)
                   if (status === 'authenticated') {

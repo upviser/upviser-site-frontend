@@ -14,4 +14,5 @@ export interface ICartProduct {
   quantityOffers?: IQuantityOffer[]
   sku?: string
   dimentions: { weight: string, height: string, width: string, length: string  }
+  idProduct?: string
 }

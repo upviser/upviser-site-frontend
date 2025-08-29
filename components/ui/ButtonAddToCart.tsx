@@ -10,11 +10,12 @@ import { NumberFormat, offer } from '@/utils'
 interface Props {
   tempCartProduct: ICartProduct
   style: any
+  idProduct?: string
 }
 
 declare const fbq: Function
 
-export const ButtonAddToCart: React.FC<Props> = ({ tempCartProduct, style }) => {
+export const ButtonAddToCart: React.FC<Props> = ({ tempCartProduct, style, idProduct }) => {
 
   const {setCart, setCartPosition, setCartView} = useContext(CartContext)
   const [text, setText] = useState('Añadir al carrito')
@@ -51,12 +52,17 @@ export const ButtonAddToCart: React.FC<Props> = ({ tempCartProduct, style }) => 
           setCart(JSON.parse(localStorage.getItem('cart')!))
         }
       } else {
-        const cartFinal = cart.concat(tempCartProduct)
+        let cartFinal
+        if (idProduct) {
+          cartFinal = cart.concat({ ...tempCartProduct, idProduct: idProduct })
+        } else {
+          cartFinal = cart.concat(tempCartProduct)
+        }
         localStorage.setItem('cart', JSON.stringify(cartFinal))
         setCart(JSON.parse(localStorage.getItem('cart')!))
       }
     } else {
-      localStorage.setItem('cart', `[${JSON.stringify(tempCartProduct)}]`)
+      localStorage.setItem('cart', `[${JSON.stringify(idProduct ? { ...tempCartProduct, idProduct: idProduct } : tempCartProduct)}]`)
       setCart(JSON.parse(localStorage.getItem('cart')!))
     }
     let offerPrice
@@ -86,7 +92,7 @@ export const ButtonAddToCart: React.FC<Props> = ({ tempCartProduct, style }) => 
   }
 
   return (
-    <button onClick={addToCart} className='py-3 w-full min-w-64 h-fit transition-all duration-200' style={{ backgroundColor: style?.primary, color: style?.button, borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
+    <button onClick={addToCart} className='py-3 w-full min-w-60 h-fit transition-all duration-200' style={{ backgroundColor: style?.primary, color: style?.button, borderRadius: style?.form === 'Redondeadas' ? `${style?.borderButton}px` : '' }}>
       {text} - ${NumberFormat(offer(tempCartProduct))}
     </button>
   )

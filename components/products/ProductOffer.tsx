@@ -1,15 +1,20 @@
 "use client"
-import React, { useState } from 'react'
-import { ICartProduct, IProductsOffer } from '../../interfaces'
+import React, { useContext, useState } from 'react'
+import { ICartProduct, IProduct, IProductsOffer } from '../../interfaces'
 import { NumberFormat } from '../../utils'
-import { Button2AddToCart, Select } from '../ui'
+import { Button2AddToCart, ButtonAddToCart, ButtonNone, Select } from '../ui'
 import Image from 'next/image'
+import CartContext from '@/context/cart/CartContext'
 
 interface Props {
   offer: IProductsOffer
+  style: any
+  product: IProduct
 }
 
-export const ProductOffer: React.FC<Props> = ({ offer }) => {
+export const ProductOffer: React.FC<Props> = ({ offer, style, product }) => {
+
+  const { cart } = useContext(CartContext)
 
   const [tempCartProduct, setTempCartProduct] = useState<ICartProduct>({
     name: offer.productsSale[0].name,
@@ -84,7 +89,11 @@ export const ProductOffer: React.FC<Props> = ({ offer }) => {
             </Select>
             : ''
         }
-        <Button2AddToCart tempCartProduct={tempCartProduct} />
+        {
+          cart?.find(prod => prod.name === product.name)
+            ? <ButtonAddToCart tempCartProduct={tempCartProduct} style={style} idProduct={product._id} />
+            : <ButtonNone style={style}>Añadir al carrito</ButtonNone>
+        }
       </div>
     </div>
   )

@@ -274,7 +274,7 @@ export const ProductInfo: React.FC<Props> = ({ product, tempCartProduct, setTemp
                 ? <div className={`${info2Loaded ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 border-b pb-4`}>
                   <h5 className='text-[16px] font-medium mb-2 md:text-[18px]'>Ofertas por la compra de este producto</h5>
                   {
-                    product.productsOffer.map(offer => <ProductOffer key={offer.productsSale[0].slug} offer={offer} />)
+                    product.productsOffer.map(offer => <ProductOffer key={offer.productsSale[0].slug} offer={offer} style={undefined} product={product} />)
                   }
                 </div>
               : ''

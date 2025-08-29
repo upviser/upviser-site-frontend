@@ -175,7 +175,15 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                         currentClient.services![0].payStatus = 'Pago realizado'
                         const service = services?.find(service => service._id === content.service?.service)
                         currentClient.services![0].step = service?.steps[service?.steps.find(step => step._id === currentClient.services![0].step) ? service?.steps.findIndex(step => step._id === currentClient.services![0].step) + 1 : 0]._id
-                        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                        let res
+                        if (content.service?.service === '682ad58f96c6028092e4ace1') {
+                          res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`)
+                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, data: [currentClient.data?.push({ name: 'panel_administrativo', value: `https://admin${Number(res?.data.index) + 1}.upviser.cl` }, { name: 'plan', value: plan!.name.split(' ')[1] })] })
+                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { email: clientRef.current.email, api: `https://api${Number(res?.data.index) + 1}.upviser.cl`, admin: `https://admin${Number(res?.data.index) + 1}.upviser.cl` })
+                          window.location.href = `https://admin${res?.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}`
+                        } else {
+                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
+                        }
                         const price = Number(initializationRef.current.amount)
                         const newEventId = new Date().getTime().toString()
                         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/pay`, { firstName: clientRef.current.firstName, lastName: clientRef.current.lastName, email: clientRef.current.email, phone: clientRef.current.phone, service: service?._id, stepService: services?.find(service => service.steps.find(step => `/${step.slug}` === pathname))?.steps.find(step => `/${step.slug}` === pathname)?._id, typeService: service?.typeService, typePrice: service?.typePrice, plan: content.service?.plan, price: price, state: 'Pago realizado', fbp: Cookies.get('_fbp'), fbc: Cookies.get('_fbc'), pathname: pathname, eventId: newEventId, funnel: clientRef.current.funnels?.length ? clientRef.current.funnels[0].funnel : undefined, step: clientRef.current.funnels?.length ? clientRef.current.funnels[0].step : undefined })
@@ -184,11 +192,6 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                         }
                         socket.emit('newNotification', { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
                         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notification`, { title: 'Nuevo pago recibido:', description: services?.find(servi => servi._id === content.service?.service)?.name, url: '/pagos', view: false })
-                        if (content.service?.service === '682ad58f96c6028092e4ace1') {
-                          const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`)
-                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { email: clientRef.current.email, api: `https://api${Number(res.data.index) + 1}.upviser.cl`, admin: `https://admin${Number(res.data.index) + 1}.upviser.cl` })
-                          window.location.href = `https://admin${res.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}`
-                        }
                         setLoading(false)
                         setPaymentCompleted(true)
                         resolve();

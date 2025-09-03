@@ -1,7 +1,7 @@
 import React from 'react'
 import { H2 } from '../ui'
 import { NumberFormat, offer } from '@/utils'
-import { ISell, IShipping } from '@/interfaces'
+import { ISell, IShipping, IStoreData } from '@/interfaces'
 
 interface Props {
     shipping: IShipping[] | undefined
@@ -15,9 +15,10 @@ interface Props {
     setServiceTypeCode?: any
     serviceTypeCodeRef?: any
     coupon: any
+    storeData: IStoreData
 }
 
-export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef, setServiceTypeCode, serviceTypeCodeRef, coupon }) => {
+export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setSell, payment, style, sellRef, initializationRef, setServiceTypeCode, serviceTypeCodeRef, coupon, storeData }) => {
   return (
     <>
       {
@@ -26,6 +27,26 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
             <div className='flex flex-col gap-4'>
               <h2 className='font-semibold text-xl sm:text-3xl'>Envío</h2>
               <div className='flex flex-col gap-2'>
+                {
+                  storeData.locations?.length && storeData.locations.find(location => location.commercial)
+                    ? (
+                      <button className='flex gap-2 justify-between p-2 border' name='shipping' onClick={(e: any) => {
+                        e.preventDefault()
+                        setSell({ ...sell, shippingMethod: 'Entrega en el local', shipping: 0, shippingState: 'No empaquetado' })
+                        sellRef.current = { ...sell, shippingMethod: 'Entrega en el local', shipping: 0, shippingState: 'No empaquetado' }
+                      }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
+                        <div className='flex gap-2'>
+                          <input type='radio' onChange={() => {
+                            setSell({ ...sell, shippingMethod: 'Entrega en el local', shipping: 0, shippingState: 'No empaquetado' })
+                            sellRef.current = { ...sell, shippingMethod: 'Entrega en el local', shipping: 0, shippingState: 'No empaquetado' }
+                          }} checked={sell.shippingMethod === 'Entrega en el local'} />
+                          <p className='text-sm mt-auto mb-auto'>Entrega en el local</p>
+                        </div>
+                        <p className='text-sm'>$0</p>
+                      </button>
+                    )
+                    : ''
+                }
                 {
                   shipping.map(item => (
                     <button className='flex gap-2 justify-between p-2 border' name='shipping' value={item.serviceDescription} onClick={(e: any) => {

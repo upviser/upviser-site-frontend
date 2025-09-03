@@ -245,7 +245,7 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
                             <>
                               <h1 className="font-medium text-2xl sm:text-4xl">Finalizar compra</h1>
                               <Data status={status} sell={sell} setContactView={setContactView} setContactOpacity={setContactOpacity} setShippingView={setShippingView} setShippingOpacity={setShippingOpacity} inputChange={inputChange} setSell={setSell} setShipping={setShipping} chilexpress={chilexpress} style={style} design={design} sellRef={sellRef} dest={dest} setDest={setDest} streets={streets} setStreets={setStreets} />
-                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} setServiceTypeCode={setServiceTypeCode} serviceTypeCodeRef={serviceTypeCodeRef} coupon={coupon} />
+                              <ShippingPay shipping={shipping} sell={sell} inputChange={inputChange} setSell={setSell} payment={payment} style={style} sellRef={sellRef} initializationRef={initializationRef} setServiceTypeCode={setServiceTypeCode} serviceTypeCodeRef={serviceTypeCodeRef} coupon={coupon} storeData={storeData} />
                               {
                                 status === 'authenticated'
                                   ? ''

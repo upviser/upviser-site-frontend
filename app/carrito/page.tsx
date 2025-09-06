@@ -1,4 +1,5 @@
 import CartPage from "@/components/cart/CartPage"
+import { Metadata } from "next"
 
 export const revalidate = 60
 
@@ -20,6 +21,13 @@ async function fetchStyle () {
 async function fetchStoreData () {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/store-data`)
   return res.json()
+}
+
+export const metadata: Metadata = {
+  title: 'Carrito',
+  twitter: {
+    card: 'summary_large_image'
+  }
 }
 
 export default async function Page () {

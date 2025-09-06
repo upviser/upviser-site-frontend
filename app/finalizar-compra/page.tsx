@@ -1,5 +1,6 @@
 import { CheckoutPage } from "@/components/checkout"
 import { IStoreData } from "@/interfaces"
+import { Metadata } from "next"
 
 export const revalidate = 3600
 
@@ -31,6 +32,13 @@ async function fetchDesign () {
 async function fetchIntegrations () {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/integrations`)
   return res.json()
+}
+
+export const metadata: Metadata = {
+  title: 'Finalizar compra',
+  twitter: {
+    card: 'summary_large_image'
+  }
 }
 
 export default async function Page () {

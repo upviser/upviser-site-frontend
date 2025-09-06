@@ -53,19 +53,19 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                       e.preventDefault()
                       setServiceTypeCode(item.serviceTypeCode)
                       serviceTypeCodeRef.current = item.serviceTypeCode
-                      let total
-                      if (coupon.discountType === 'Porcentaje') {
+                      let total = sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0)
+                      if (coupon?.discountType === 'Porcentaje') {
                         if (coupon.minimumAmount < sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) || !coupon.minimumAmount) {
-                          total = ((sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) / 100) * (100 - coupon.value)) + item.serviceValue
+                          total = ((sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) / 100) * (100 - coupon.value))
                         }
-                      } else if (coupon.discountType === 'Valor') {
+                      } else if (coupon?.discountType === 'Valor') {
                         if (coupon.minimumAmount < sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) || !coupon.minimumAmount) {
-                          total = sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) - coupon.value + item.serviceValue
+                          total = sell.cart.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) - coupon.value
                         }
                       }
-                      setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total })
-                      sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total }
-                      initializationRef.current = { amount: total }
+                      setSell({ ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total + item.serviceValue })
+                      sellRef.current = { ...sell, shippingMethod: item.serviceDescription, shipping: item.serviceValue, shippingState: 'No empaquetado', total: total + item.serviceValue }
+                      initializationRef.current = { amount: total + item.serviceValue }
                     }} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }} key={item.serviceTypeCode}>
                       <div className='flex gap-2'>
                         <input type='radio' onChange={() => {

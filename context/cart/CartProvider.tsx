@@ -25,12 +25,15 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
     if (phone || messengerId || instagramId) {
       if (phone) {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${phone}`)
+        localStorage.setItem('cart', JSON.stringify(res.data.cart.cart))
         setCart(res.data.cart.cart)
       } else if (messengerId) {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${messengerId}`)
+        localStorage.setItem('cart', JSON.stringify(res.data.cart.cart))
         setCart(res.data.cart.cart)
       } else if (instagramId) {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${instagramId}`)
+        localStorage.setItem('cart', JSON.stringify(res.data.cart.cart))
         setCart(res.data.cart.cart)
       }
     } else {

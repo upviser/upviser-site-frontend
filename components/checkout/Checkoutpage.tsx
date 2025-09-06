@@ -75,12 +75,20 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
 
   const router = useRouter()
 
-  useEffect(() => {
+  const updateCart = async () => {
     if (cart?.length) {
-      setSell({ ...sell, cart: cart!, total: cart!.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) })
-      sellRef.current = { ...sell, cart: cart!, total: cart!.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) }
-      initializationRef.current = { amount: cart?.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) }
+      const carritoVerificado = await verificarStockCarrito(cart);
+      setSell({ ...sell, cart: carritoVerificado!, total: carritoVerificado!.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) })
+      sellRef.current = { ...sell, cart: carritoVerificado!, total: carritoVerificado!.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) }
+      initializationRef.current = { amount: carritoVerificado?.reduce((bef, curr) => curr.quantityOffers?.length ? bef + offer(curr) : bef + curr.price * curr.quantity, 0) }
+      if (!carritoVerificado.length) {
+        router.push('/carrito')
+      }
     }
+  }
+
+  useEffect(() => {
+    updateCart()
   }, [cart])
 
   const getClientData = async () => {
@@ -174,22 +182,6 @@ export const CheckoutPage: React.FC<Props> = ({ storeData, chilexpress, style, p
     } else {
       getClientData()
     }
-  }, [])
-
-  useEffect(() => {
-    const limpiarCarrito = async () => {
-      const cartGuardado = JSON.parse(localStorage.getItem("cart") || "[]");
-      const carritoVerificado = await verificarStockCarrito(cartGuardado);
-      setCart(carritoVerificado);
-      setSell({ ...sell, cart: carritoVerificado })
-      sellRef.current = { ...sell, cart: carritoVerificado }
-      localStorage.setItem("cart", JSON.stringify(carritoVerificado));
-      if (!carritoVerificado.length) {
-        router.push('/carrito')
-      }
-    };
-
-    limpiarCarrito();
   }, [])
 
   const inputChange = async (e: any) => {

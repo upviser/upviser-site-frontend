@@ -19,12 +19,12 @@ const CartProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const currentUrl = window.location.href
     const url = new URL(currentUrl)
     const params = new URLSearchParams(url.search)
-    const number = params.get('number')
+    const phone = params.get('phone')
     const messengerId = params.get('messengerId');
     const instagramId = params.get('instagramId');
-    if (number || messengerId || instagramId) {
-      if (number) {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${number}`)
+    if (phone || messengerId || instagramId) {
+      if (phone) {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${phone}`)
         setCart(res.data.cart.cart)
       } else if (messengerId) {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/cart/${messengerId}`)

@@ -75,7 +75,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
 
   const pathname = usePathname()
 
-  initMercadoPago(services?.find(servi => servi._id === content.service?.service)?.typePrice === 'Suscripción' ? payment?.suscription.publicKey! : payment?.mercadoPago.publicKey!)
+  initMercadoPago(payment?.mercadoPago.publicKey!)
 
   const viewCheckout = async () => {
     const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/funnel-by-step${pathname}`)
@@ -418,7 +418,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
   return (
     <div className={`py-10 md:py-20 w-full flex px-4`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}`, color: content.info.textColor }}>
       {
-        ((service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') && (payment?.suscription.active && payment.suscription.accessToken !== '' && payment.suscription.publicKey !== '')) || ((payment?.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '') || (payment?.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''))
+        ((service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') && (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '')) || ((payment?.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== ''))
           ? (
             <div className='m-auto w-full max-w-[1280px] gap-6 flex flex-col'>
               { 
@@ -623,7 +623,7 @@ export const Checkout: React.FC<Props> = ({ content, services, step, payment, st
                                         : ''
                                     }
                                     {
-                                      payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
+                                      payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
                                         ? (
                                           <div className='w-full'>
                                             <button className='flex gap-2 p-2 border w-full' onClick={() => setPay('MercadoPagoPro')} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>

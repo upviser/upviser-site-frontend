@@ -123,7 +123,7 @@ export const ShippingPay: React.FC<Props> = ({ shipping, sell, inputChange, setS
                     : ''
                 }
                 {
-                  payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''
+                  payment.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== ''
                     ? (
                       <button className='flex gap-2 p-2 border' name='pay' value='MercadoPagoPro' onClick={inputChange} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>
                         <input type='radio' name='pay' value='MercadoPagoPro' onChange={inputChange} checked={sell.pay === 'MercadoPagoPro'} />

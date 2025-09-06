@@ -8,15 +8,5 @@ export interface IPayment {
         active?: boolean
         accessToken?: string
         publicKey?: string
-    },
-    mercadoPagoPro: {
-        active?: boolean
-        accessToken?: string
-        publicKey?: string
-    },
-    suscription: {
-        active?: boolean
-        accessToken?: string
-        publicKey?: string
     }
 }

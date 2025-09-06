@@ -344,7 +344,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
     <div className={`${popup.view} ${popup.opacity} transition-opacity duration-200 w-full h-full top-0 fixed bg-black/30 flex z-50 px-4`}>
       <div ref={popupRef} onMouseEnter={() => setPopup({ ...popup, mouse: true })} onMouseLeave={() => setPopup({ ...popup, mouse: false })} className={`${popup.opacity === 'opacity-1' ? 'scale-1' : 'scale-90'} max-w-[800px] transition-transform duration-200 w-full rounded-2xl max-h-[600px] overflow-y-auto bg-white m-auto flex flex-col`} style={{ boxShadow: '0px 3px 20px 3px #11111120' }}>
         {
-          ((service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') && (payment?.suscription.active && payment.suscription.accessToken !== '' && payment.suscription.publicKey !== '')) || ((payment?.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '') || (payment?.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey !== ''))
+          ((service?.typePrice === 'Suscripción' || service?.typePrice === 'Pago variable con suscripción') && (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== '')) || ((payment?.transbank.active && payment.transbank.commerceCode !== '' && payment.transbank.apiKey !== '') || (payment?.mercadoPago.active && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey !== ''))
             ? (
               <>
                 <div className='flex flex-col gap-4 sticky top-0 bg-white border-b z-50 p-6 md:p-8'>
@@ -608,7 +608,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                                                     : ''
                                                 }
                                                 {
-                                                  payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
+                                                  payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
                                                     ? (
                                                       <div className='w-full px-6 pb-6 md:px-8 md:pb-8'>
                                                         <button className='flex gap-2 p-2 border w-full' onClick={() => setPay('MercadoPagoPro')} style={{ borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}>

@@ -712,7 +712,7 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
                                 : ''
                             }
                             {
-                              payment.mercadoPagoPro.active && payment.mercadoPagoPro.accessToken && payment.mercadoPagoPro.accessToken !== '' && payment.mercadoPagoPro.publicKey && payment.mercadoPagoPro.publicKey !== ''
+                              payment.mercadoPago.active && payment.mercadoPago.accessToken && payment.mercadoPago.accessToken !== '' && payment.mercadoPago.publicKey && payment.mercadoPago.publicKey !== ''
                                 ? (
                                   <div className='w-full'>
                                     <button className='flex gap-2 p-2 border w-full' onClick={(e: any) => {

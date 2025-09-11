@@ -53,7 +53,7 @@ export default function Page () {
                 <>
                   {
                     sell.cart.map(product => (
-                      <div className="flex flex-col gap-4 p-2 border rounded-xl">
+                      <div key={product._id} className="flex flex-col gap-4 p-2 border rounded-xl">
                         <p className="text-lg font-medium">{product.name}</p>
                         <Image src={product.image!} alt={`Imagen producto ${product.name}`} width={100} height={100} />
                         <div className="flex flex-col gap-2">

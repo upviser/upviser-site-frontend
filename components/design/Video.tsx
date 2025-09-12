@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { IStoreData } from '@/interfaces'
 
-export const Video = ({ content, index, storeData }: { content: any, index: any, storeData?: IStoreData }) => {
+export const Video = ({ content, index, storeData, style }: { content: any, index: any, storeData?: IStoreData, style: any }) => {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [viewLogo, setViewLogo] = useState(false)
@@ -138,7 +138,7 @@ export const Video = ({ content, index, storeData }: { content: any, index: any,
             )
             : ''
         }
-        <div style={{ position: 'relative', paddingTop: '56.25%', backgroundColor: '#000' }}><iframe src={content.info.video} loading="lazy" onLoad={() => setIsLoaded(true)} style={{ border: 0, position: 'absolute', top: 0, height: '100%', width: '100%' }} allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;" allowFullScreen={true}></iframe></div>
+        <div className='max-w-[1000px] m-auto w-full'><div style={{ position: 'relative', paddingTop: '56.25%', backgroundColor: '#000', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '' }}><iframe src={content.info.video} loading="lazy" onLoad={() => setIsLoaded(true)} style={{ border: 0, position: 'absolute', top: 0, height: '100%', width: '100%', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '' }} allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;" allowFullScreen={true}></iframe></div></div>
       </div>
     </div>
   )

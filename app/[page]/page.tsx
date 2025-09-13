@@ -127,9 +127,9 @@ export default async function Page({ params }: { params: { page: string } }) {
           } else if (content.content === 'Bloque 5') {
             return <Block5 key={content.content} content={content} index={index} forms={forms} calls={calls} design={design} payment={payment} style={style} storeData={storeData} />
           } else if (content.content === 'Contacto') {
-            return <ContactPage key={content.content} info={ content.info } index={index} style={style} />
+            return <ContactPage key={content.content} info={content.info} index={index} style={style} />
           } else if (content.content === 'Suscripción') {
-            return <Subscribe key={content.content} info={ content.info } style={style} />
+            return <Subscribe key={content.content} info={content.info} style={style} />
           } else if (content.content === 'Lead 1') {
             return <Lead1 key={content.content} content={content} forms={forms} step={page.step} index={index} services={services} style={style} />
           } else if (content.content === 'Video') {

@@ -230,8 +230,8 @@ export const Lead1 = ({ content, forms, step, index, services, style, storeData 
 
   return (
     <div className={`py-10 md:py-20 w-full flex px-4`} style={{ background: `${content.info.typeBackground === 'Degradado' ? content.info.background : content.info.typeBackground === 'Color' ? content.info.background : ''}` }}>
-      <div className="flex flex-col gap-8 m-auto w-full max-w-[1280px] lg:flex-row">
-        <div className='w-full flex flex-col gap-4 my-auto lg:w-1/2'>
+      <div className="flex flex-col gap-6 lg:gap-8 m-auto w-full max-w-[1280px] lg:flex-row">
+        <div className='w-full flex flex-col gap-4 lg:gap-6 my-auto lg:w-1/2'>
           {
             content.info.titleForm === 'Logo principal' && storeData?.logo && storeData.logo !== ''
               ? <Link ref={refLogo} href='/' target='_blank' className={`${viewLogo ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 w-fit m-auto`}><Image src={storeData.logo} alt={`Logo ${storeData.name}`} width={320} height={150} className='w-44 m-auto lg:w-52' /></Link>

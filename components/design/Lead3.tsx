@@ -256,7 +256,7 @@ export const Lead3: React.FC<Props> = ({ content, index, style, services, forms,
         }`,
       }}
     >
-      <div className='flex flex-col gap-8 w-full max-w-[1280px] m-auto'>
+      <div className='flex flex-col gap-4 lg:gap-6 w-full max-w-[1280px] m-auto'>
         {
           content.info.titleForm === 'Logo principal' && storeData?.logo && storeData.logo !== ''
             ? <Link ref={refLogo} href='/' target='_blank' className={`${viewLogo ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 w-fit m-auto`}><Image src={storeData.logo} alt={`Logo ${storeData.name}`} width={320} height={150} className='w-44 m-auto lg:w-52' /></Link>
@@ -290,7 +290,7 @@ export const Lead3: React.FC<Props> = ({ content, index, style, services, forms,
         {
           (content.info.subTitle && content.info.subTitle !== '') || (content.info.subTitle2 && content.info.subTitle2 !== '') || (content.info.subTitle3 && content.info.subTitle3 !== '') || (content.info.subTitle4 && content.info.subTitle4 !== '')
             ? (
-              <div ref={refCheck} className={`${viewCheck ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 flex flex-col gap-4`}>
+              <div ref={refCheck} className={`${viewCheck ? 'opacity-1' : 'opacity-0 translate-y-6'} transition-all duration-500 flex flex-col gap-3 lg:gap-4`}>
                 {
                   content.info.subTitle && content.info.subTitle !== ''
                     ? (

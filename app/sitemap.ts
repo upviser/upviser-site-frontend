@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const posts: IPost[] = await fetchPosts()
 
-    const pagesEntries: MetadataRoute.Sitemap = design.pages.map(page => ({
+    const pagesEntries: MetadataRoute.Sitemap = design.pages.filter(page => page.page !== 'Blog').map(page => ({
         url: `${process.env.NEXT_PUBLIC_WEB_URL}/${page.slug}`,
         lastModified: new Date(page.updatedAt!),
         changeFrequency: 'weekly',

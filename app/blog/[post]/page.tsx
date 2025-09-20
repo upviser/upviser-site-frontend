@@ -12,6 +12,11 @@ async function fetchPosts () {
   return res.json()
 }
 
+async function fetchStyle () {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/style`)
+  return res.json()
+}
+
 export async function generateMetadata({
   params
 }: {
@@ -38,9 +43,11 @@ export default async function Page ({ params }: { params: { post: string } }) {
 
   const postsData = fetchPosts()
 
-  const [post, posts] = await Promise.all([postData, postsData])
+  const styleData = fetchStyle()
+
+  const [post, posts, style] = await Promise.all([postData, postsData, styleData])
 
   return (
-    <PagePost post={post} posts={posts} />
+    <PagePost post={post} posts={posts} style={style} />
   )
 }

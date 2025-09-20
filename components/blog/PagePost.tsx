@@ -5,7 +5,7 @@ import { IPost } from '@/interfaces'
 import Link from 'next/link'
 import { H1 } from '../ui'
 
-const PagePost = ({ post, posts }: { post: IPost, posts: IPost[] }) => {
+const PagePost = ({ post, posts, style }: { post: IPost, posts: IPost[], style?: any }) => {
 
   const [postsFiltered, setPostsFiltered] = useState<IPost[]>([])
 
@@ -24,11 +24,11 @@ const PagePost = ({ post, posts }: { post: IPost, posts: IPost[] }) => {
         <div className={`flex flex-col gap-4 w-full ${postsFiltered.length ? '' : 'm-auto'} 1280:w-2/3`}>
           {
             post.image && post.image !== ''
-              ? <Image src={post.image} alt={`Imagen principal post ${post.title}`} className="m-auto" width={500} height={500} />
+              ? <Image src={post.image} alt={`Imagen principal post ${post.title}`} className="m-auto max-w-[1000px] w-full" width={1000} height={1000} style={{ borderRadius: style?.form === 'Redondeadas' ? `${style.borderBlock}px` : '' }} />
               : ''
           }
           <H1 text={post.title} />
-          <div className='flex flex-col gap-4' dangerouslySetInnerHTML={{ __html: post.content.replace('<h1>', '<h1 class="text-[25px] font-medium tracking-wide lg:text-[32px]">').replace('<h2>', '<h2 class="text-[20px] font-medium tracking-wide lg:text-[24px]">').replace('<h3>', '<h3 class="font-medium tracking-wide text-[16px] lg:text-[20px]">') }} />
+          <div className='flex flex-col gap-4' dangerouslySetInnerHTML={{ __html: post.content.replaceAll('<h1>', '<h1 class="text-[30px] font-medium tracking-wide lg:text-[48px]">').replaceAll('<h2>', '<h2 class="text-[24px] font-medium tracking-wide lg:text-[30px]">').replaceAll('<h3>', '<h3 class="font-medium tracking-wide text-[20px] lg:text-[24px]">').replaceAll('<img src', `<img style="width:100%;max-width:1000px;border-radius:${style?.form === 'Redondeadas' ? `${style.borderBlock}px;` : ''}" src`).replaceAll('<p>', '<p style="font-size:18px;">') }} />
           <div className='flex flex-col gap-2 mt-2'>
             <p className='font-medium'>Compartir</p>
             <div className='flex gap-2'>

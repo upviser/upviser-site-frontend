@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { H1, H2 } from '../ui'
 
-export const PageBlog = ({ posts }: { posts: IPost[] }) => {
+export const PageBlog = ({ posts, style }: { posts: IPost[], style: any }) => {
   return (
     <div className="w-full flex p-4">
       <div className="w-full max-w-[1280px] m-auto flex flex-col gap-4">
@@ -17,7 +17,7 @@ export const PageBlog = ({ posts }: { posts: IPost[] }) => {
                 <Link key={post._id} href={`/blog/${post._id}`} className='flex flex-col gap-2 w-[300px] bg-white p-2 rounded-md transition-colors duration-300 hover:bg-[#f5f5f7]'>
                   {
                     post.image && post.image !== ''
-                      ? <Image src={post.image} alt={`Imagen post ${post.title}`} width={300} height={300} />
+                      ? <Image src={post.image} alt={`Imagen post ${post.title}`} width={300} height={300} style={{ borderRadius: style?.form === 'Redondeadas' ? `${style.borderBlock}px` : '' }} />
                       : ''
                   }
                   <p className='text-lg font-medium'>{post.title}</p>

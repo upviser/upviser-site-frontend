@@ -28,7 +28,7 @@ const PagePost = ({ post, posts, style }: { post: IPost, posts: IPost[], style?:
               : ''
           }
           <H1 text={post.title} />
-          <div className='flex flex-col gap-4' dangerouslySetInnerHTML={{ __html: post.content.replaceAll('<h1>', '<h1 class="text-[30px] font-medium tracking-wide lg:text-[48px]">').replaceAll('<h2>', '<h2 class="text-[24px] font-medium tracking-wide lg:text-[30px]">').replaceAll('<h3>', '<h3 class="font-medium tracking-wide text-[20px] lg:text-[24px]">').replaceAll('<img src', `<img style="width:100%;max-width:1000px;border-radius:${style?.form === 'Redondeadas' ? `${style.borderBlock}px;` : ''}" src`).replaceAll('<p>', '<p style="font-size:18px;">') }} />
+          <div className='flex flex-col gap-4' dangerouslySetInnerHTML={{ __html: post.content?.replaceAll('<h1>', '<h1 class="text-[30px] font-medium tracking-wide lg:text-[48px]">').replaceAll('<h2>', '<h2 class="text-[24px] font-medium tracking-wide lg:text-[30px]">').replaceAll('<h3>', '<h3 class="font-medium tracking-wide text-[20px] lg:text-[24px]">').replaceAll('<img src', `<img style="width:100%;max-width:1000px;border-radius:${style?.form === 'Redondeadas' ? `${style.borderBlock}px;` : ''}" src`).replaceAll('<p>', '<p style="font-size:18px;">') }} />
           <div className='flex flex-col gap-2 mt-2'>
             <p className='font-medium'>Compartir</p>
             <div className='flex gap-2'>

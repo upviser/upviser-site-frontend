@@ -358,6 +358,7 @@ export const Lead3: React.FC<Props> = ({ content, index, style, services, forms,
                       left: 0,
                       width: '100%',
                       height: '100%',
+                      borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : ''
                     }}
                     allow="accelerometer; gyroscope; encrypted-media; picture-in-picture;"
                     allowFullScreen={true}

@@ -345,6 +345,7 @@ export const Lead3: React.FC<Props> = ({ content, index, style, services, forms,
                     marginLeft: 'auto',
                     marginRight: 'auto',
                     width: '100%', // Se ajusta a la pantalla, pero no excede el max-width
+                    borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : ''
                   }}
                 >
                   <iframe

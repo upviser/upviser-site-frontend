@@ -179,7 +179,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                         if (content.service?.service === '682ad58f96c6028092e4ace1') {
                           res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`)
                           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, data: [currentClient.data?.push({ name: 'panel_administrativo', value: `https://admin${Number(res?.data.index) + 1}.upviser.cl` }, { name: 'plan', value: plan!.name.split(' ')[1] })] })
-                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { email: clientRef.current.email, api: `https://api${Number(res?.data.index) + 1}.upviser.cl`, admin: `https://admin${Number(res?.data.index) + 1}.upviser.cl` })
+                          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { email: clientRef.current.email, api: `https://api${Number(res?.data.index) + 1}.upviser.cl`, admin: `https://admin${Number(res?.data.index) + 1}.upviser.cl`, senderEmail: `web${res?.data.index + 1}@upviser.cl` })
                           window.location.href = `https://admin${res?.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}`
                         } else {
                           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)

@@ -251,7 +251,12 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
                 <div className='flex gap-6 justify-around flex-wrap'>
                   {
                     services?.find(service => service._id === content.service?.service)?.plans?.plans.map((plan, index) => (
-                      <div className={`${index === 0 ? plan1Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 1 ? plan2Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 2 ? plan3Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 3 ? plan4Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 4 ? plan5Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : ''} transition-all duration-500 p-6 flex flex-col gap-4 w-full max-w-96 justify-between`} key={plan._id} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '', backgroundColor: content.info.image }}>
+                      <div className={`${index === 0 ? plan1Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 1 ? plan2Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 2 ? plan3Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 3 ? plan4Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : index === 4 ? plan5Loaded ? 'opacity-1' : 'opacity-0 translate-y-6' : ''} transition-all duration-500 p-6 flex flex-col gap-4 w-full max-w-96 justify-between`} key={plan._id} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `${plan.recommended ? 2 : 1}px solid ${plan.recommended ? style.primary : style.borderColor}` : '', backgroundColor: content.info.image }}>
+                        {
+                          plan.recommended
+                            ? <p className='px-3 py-1 w-fit rounded-full text-white mx-auto -mt-10' style={{ backgroundColor: `${style.primary}` }}>Más recomendado</p>
+                            : ''
+                        }
                         <div className='flex flex-col gap-4'>
                           <p className='text-center font-medium text-xl'>{plan.name}</p>
                           <div className='flex gap-2 w-fit m-auto'>

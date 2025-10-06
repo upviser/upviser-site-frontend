@@ -259,6 +259,7 @@ export const Plans: React.FC<Props> = ({ content, services, index, payment, step
                         }
                         <div className='flex flex-col gap-4'>
                           <p className='text-center font-medium text-xl'>{plan.name}</p>
+                          <p className='m-auto text-black/70'>{plan.description}</p>
                           <div className='flex gap-2 w-fit m-auto'>
                             <p className='text-center font-bold text-3xl'>${NumberFormat(Number(typePrice === 'Mensual' ? plan.price : plan.anualPrice))}</p>
                             <p ref={index === 0 ? plan1Ref : index === 1 ? plan2Ref : index === 2 ? plan3Ref : index === 3 ? plan4Ref : index === 4 ? plan5Ref : ''} className='my-auto'>{services?.find(service => service._id === content.service?.service)?.typePrice === 'Suscripción' ? `/ ${typePrice === 'Mensual' ? 'Mes' : 'Anual'}` : ''}</p>

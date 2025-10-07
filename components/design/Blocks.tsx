@@ -394,7 +394,7 @@ export const Blocks: React.FC<Props> = ({ content, index, style, storeData }) =>
                     <div className='flex flex-col gap-2 m-auto'>
                       {
                         block.image && block.image !== ''
-                          ? <Image className='h-52' src={block.image} alt={`Imagen del bloque de ${block.title}`} width={1000} height={800} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }} />
+                          ? <Image className='w-full sm:h-52' src={block.image} alt={`Imagen del bloque de ${block.title}`} width={1000} height={800} style={{ boxShadow: style.design === 'Sombreado' ? `0px 3px 20px 3px ${style.borderColor}10` : '', borderRadius: style.form === 'Redondeadas' ? `${style.borderBlock}px` : '', border: style.design === 'Borde' ? `1px solid ${style.borderColor}` : '' }} />
                           : ''
                       }
                       {block.title && block.title !== "" ? (

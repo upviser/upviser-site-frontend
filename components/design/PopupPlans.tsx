@@ -180,7 +180,7 @@ export const PopupPlans: React.FC<Props> = ({ popup, setPopup, plan, services, p
                           res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`)
                           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, { ...currentClient, data: [currentClient.data?.push({ name: 'panel_administrativo', value: `https://admin${Number(res?.data.index) + 1}.upviser.cl` }, { name: 'plan', value: plan!.name.split(' ')[1] })] })
                           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user`, { email: clientRef.current.email, api: `https://api${Number(res?.data.index) + 1}.upviser.cl`, admin: `https://admin${Number(res?.data.index) + 1}.upviser.cl`, senderEmail: `web${res?.data.index + 1}@upviser.cl` })
-                          window.location.href = `https://admin${res?.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}`
+                          window.location.href = `https://admin${res?.data.length}.upviser.cl/ingresar?plan=${plan?.name.split(' ')[1]}&limite=${currentClient.data?.find(dat => dat.name === 'limite_plan')}`
                         } else {
                           await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/clients`, currentClient)
                         }

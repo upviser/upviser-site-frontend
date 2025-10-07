@@ -765,7 +765,7 @@ export const Calendar: React.FC<CalendarProps> = ({ newClient, setNewClient, tag
         <button 
           key={i} 
           disabled={!isAvailable} 
-          className={`w-10 h-10 sm:w-12 sm:h-12 m-auto flex transition-color duration-150`}
+          className={`w-[36px] h-9 sm:w-12 sm:h-12 m-auto flex transition-color duration-150`}
           style={{ backgroundColor: isAvailable ? (isSelected ? style.primary : content?.info.textColor && content.info.textColor !== '' ? `${content.info.textColor}15` : '#11111120') : '', color: isAvailable ? (isSelected ? style.button : `${content?.info.textColor}`) : `${content?.info.textColor}70`, borderRadius: style.form === 'Redondeadas' ? `${style.borderButton}px` : '' }}
           onClick={() => handleDateTimeSelect(currentDate)}
         >
